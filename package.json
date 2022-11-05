@@ -1,0 +1,32 @@
+{
+  "name": "meanmotogp",
+  "version": "1.0.0",
+  "description": "Moto gp crud web application using express and mongo db",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kcprabase/meanMotoGP.git"
+  },
+  "keywords": [
+    "MEAN",
+    "Node.JS",
+    "Express",
+    "MongoDB",
+    "MotoGP"
+  ],
+  "author": "Prabesh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kcprabase/meanMotoGP/issues"
+  },
+  "homepage": "https://github.com/kcprabase/meanMotoGP#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^6.7.1"
+  }
+}
