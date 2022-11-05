@@ -3,12 +3,15 @@ require("dotenv").config();
 const app = express();
 
 app.use((req, res, next) => {
-    console.log("REC_", req, res);
+    console.log("REC_", req.method, req.url);
     next();
 });
 app.use((err, req, res, next) => {
     console.error("ERR_", err);
     next();
+});
+app.get("/", (req, res) => {
+    res.send("MEAN MotoGP");
 });
 
 
