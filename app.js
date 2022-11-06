@@ -1,6 +1,9 @@
 const express = require("express");
 require("dotenv").config();
+require("./api/data/db");
 const app = express();
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json())
 
 app.use((req, res, next) => {
     console.log("REC_", req.method, req.url);
