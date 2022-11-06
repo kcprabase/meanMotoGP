@@ -18,5 +18,5 @@ router.route("/races/:raceId/teams/:teamId")
     .delete(teamController.deleteOne)
     .put(teamController.updateOne);
 
-
+module.exports = router;
 

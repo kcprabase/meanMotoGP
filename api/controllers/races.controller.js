@@ -38,7 +38,7 @@ const getOne = (req, res) => {
 const addOne = (req, res) => {
     console.log("Race add one request");
     const newRace = {
-        raceTrackName: req.body.raceTrackName,
+        circuitName: req.body.circuitName,
         season: req.body.season,
         winner: req.body.winner,
     };
@@ -75,7 +75,7 @@ const deleteOne = function (req, res) {
 const udpateOne = function (req, res) {
     const raceId = req.params.raceId;
     const raceToUdpateWith = {
-        raceTrackName: req.body.raceTrackName,
+        circuitName: req.body.circuitName,
         season: req.body.season,
         winner: req.body.winner,
     };
