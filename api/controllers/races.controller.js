@@ -21,7 +21,7 @@ const getAll = (req, res) => {
 const getOne = (req, res) => {
     const raceId = req.params.raceId;
     Race.findById(raceId).exec((err, race) => {
-        const response = { status: process.env.OkStatusCode, message: race }
+        let response = { status: process.env.OkStatusCode, message: race }
         if (err) {
             console.log("error while fetching race");
             response.status = process.env.InternalServerErrorStatusCode;
@@ -43,7 +43,7 @@ const addOne = (req, res) => {
         winner: req.body.winner,
     };
     Race.create(newRace, (err, race) => {
-        const response = { status: 201, message: race };
+        let response = { status: 201, message: race };
         if (err) {
             console.log("error creating race");
             response = { status: process.env.InternalServerErrorStatusCode, message: err };
@@ -55,7 +55,7 @@ const addOne = (req, res) => {
 const deleteOne = function (req, res) {
     const raceId = req.params.raceId;
     Race.findByIdAndDelete(raceId).exec((err, deletedRace) => {
-        const response = { status: process.env.NoContentSuccessStatusCode, message: deletedRace };
+        let response = { status: process.env.CreateSuccessStatusCode, message: deletedRace };
         if (err) {
             console.log("Error finding race");
             response.status = process.env.InternalServerErrorStatusCode;
@@ -66,6 +66,8 @@ const deleteOne = function (req, res) {
             response.message = {
                 "message": "Race ID not found"
             };
+        } else {
+            response.message = "Race deleted"
         }
         res.status(response.status).json(response.message);
     });
@@ -73,6 +75,7 @@ const deleteOne = function (req, res) {
 
 
 const udpateOne = function (req, res) {
+    console.log("update called", req.body)
     const raceId = req.params.raceId;
     const raceToUdpateWith = {
         circuitName: req.body.circuitName,
@@ -80,7 +83,7 @@ const udpateOne = function (req, res) {
         winner: req.body.winner,
     };
     Race.findByIdAndUpdate(raceId, raceToUdpateWith).exec((err, udpatedRace) => {
-        const response = { status: process.env.NoContentSuccessStatusCode, message: udpatedRace };
+        let response = { status: process.env.NoContentSuccessStatusCode, message: udpatedRace };
         if (err) {
             console.log("Error finding race");
             response.status = process.env.InternalServerErrorStatusCode;
@@ -89,9 +92,10 @@ const udpateOne = function (req, res) {
             console.log("Race id not found");
             response.status = process.env.ResourceNotFoundStatusCode;
             response.message = {
-                "message": "Race ID not found"
+                "message": "Race ID not found."
             };
         }
+        console.log("update success ful", raceToUdpateWith, "and", udpatedRace);
         res.status(response.status).json(response.message);
     });
 }

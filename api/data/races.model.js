@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const teamSchema = mongoose.Schema({
     riderName: { type: String, required: true },
     teamName: { type: String, required: true },
-    rank: { type: Number, required: true }
+    rank: { type: Number, required: true, min: 1, max: 30 }
 });
 
 const raceSchema = mongoose.Schema({
