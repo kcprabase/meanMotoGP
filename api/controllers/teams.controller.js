@@ -132,6 +132,10 @@ const deleteOne = (req, res) => {
 };
 
 const _updateTeam = function (req, res, race) {
+    let response = {
+        status: 201,
+        message: []
+    };
     const teamId = req.params.teamId;
     const teamToUpdateWith = {
         riderName: req.body.riderName,
@@ -139,22 +143,27 @@ const _updateTeam = function (req, res, race) {
         rank: req.body.rank
     }
     const updateIndex = race.teams.findIndex(team => team._id.equals(teamId));
-    race.teams[updateIndex] = { ...race.teams[updateIndex], ...teamToUpdateWith };
-
-    race.save(function (err, updatedRace) {
-        let response = {
-            status: 204,
-            message: []
-        };
-        if (err) {
-            response.status = 500;
-            response.message = err;
-        } else {
-            response.status = 201;
-            response.message = updatedRace.teams;
-        }
+    if (updateIndex >= 0) {
+        // race.teams[updateIndex] = { ...race.teams[updateIndex], ...teamToUpdateWith };
+        
+        race.teams[updateIndex].riderName = teamToUpdateWith.riderName;
+        race.teams[updateIndex].teamName = teamToUpdateWith.teamName;
+        race.teams[updateIndex].rank = teamToUpdateWith.rank;
+        race.save(function (err, updatedRace) {
+            if (err) {
+                response.status = 500;
+                response.message = err;
+            } else {
+                response.status = 201;
+                response.message = updatedRace.teams;
+            }
+            res.status(response.status).json(response.message);
+        });
+    } else {
+        response.status = process.env.ResourceNotFoundStatusCode;
+        response.message = "Team with given id doesnot exist";
         res.status(response.status).json(response.message);
-    });
+    }
 };
 
 const updateOne = (req, res) => {
