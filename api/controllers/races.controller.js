@@ -17,15 +17,6 @@ const _findRaceByIdAndCallBack = (req, res, callBack) => {
     }
 }
 
-const _checkRaceIdValidityAndExecuteTask = (req, res, func) => {
-    const raceId = req.params.raceId;
-    if (mongoose.isValidObjectId(raceId)) {
-        func(req, res, raceId);
-    } else {
-        _sendResponse(res, { status: process.env.BadRequestStatusCode, message: process.env.InvalidRaceIdMsg });
-    }
-}
-
 const getAll = (req, res) => {
     let offset = 0;
     let count = 5;
