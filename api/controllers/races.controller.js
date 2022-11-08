@@ -159,39 +159,6 @@ const _partialUpdateOneCallBack = (req, res, err, race) => {
 
 const partialUpdate = (req, res) => {
     _findRaceByIdAndCallBack(req, res, _partialUpdateOneCallBack);
-    // const raceId = req.params.raceId;
-    // if (mongoose.isValidObjectId(raceId)) {
-    //     Race.findById(raceId).exec((err, race) => {
-    //         let response = {
-    //             status: process.env.NoContentSuccessStatusCode,
-    //             message: race
-    //         };
-    //         if (err) {
-    //             response.status = process.env.InternalServerErrorStatusCode;
-    //             response.message = err;
-    //         }
-    //         if (!race) {
-    //             response.status = process.env.ResourceNotFoundStatusCode;
-    //             response.message = process.env.RaceIdNotFound;
-    //         }
-    //         if (response.status !== process.env.NoContentSuccessStatusCode) {
-    //             _sendResponse(res, response);
-    //         } else {
-    //             if (req.body.circuitName) race.circuitName = req.body.circuitName;
-    //             if (req.body.season) race.season = req.body.season;
-    //             if (req.body.winner) race.winner = req.body.winner;
-    //             race.save((err, updatedGame) => {
-    //                 if (err) {
-    //                     response.status = process.env.InternalServerErrorStatusCode;
-    //                     response.message = err;
-    //                 }
-    //                 _sendResponse(res, response);
-    //             });
-    //         }
-    //     });
-    // } else {
-    //     _sendResponse(res, { status: parseInt(process.env.BadRequestStatusCode), message: process.env.InvalidRaceIdMsg });
-    // }
 }
 
 module.exports = { getAll, getOne, addOne, deleteOne, fullUpdate, partialUpdate };
