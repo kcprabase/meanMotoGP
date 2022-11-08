@@ -1,4 +1,3 @@
-const { response } = require("express");
 const mongoose = require("mongoose");
 const Race = mongoose.model(process.env.RaceModel);
 
@@ -87,22 +86,25 @@ const addOne = (req, res) => {
     });
 };
 
-const _deleteOne = (req, res, raceId) => {
-    Race.findByIdAndDelete(raceId).exec((err, deletedRace) => {
-        let response = { status: process.env.NoContentSuccessStatusCode, message: deletedRace };
+const deleteOne = (req, res) => {
+    const _deleteOne = (req, res, err, race) => {
+        let response = {
+            status: process.env.NoContentSuccessStatusCode,
+            message: race
+        };
+        if (!race) {
+            response.status = process.env.ResourceNotFoundStatusCode;
+            response.message = process.env.RaceWithIdDoesnotExist;
+        } else {
+            race.delete();
+        }
         if (err) {
             response.status = process.env.InternalServerErrorStatusCode;
             response.message = err;
-        } else if (!deletedRace) {
-            response.status = process.env.ResourceNotFoundStatusCode;
-            response.message = process.env.RaceIdNotFound;
         }
         _sendResponse(res, response);
-    });
-}
-
-const deleteOne = (req, res) => {
-    _checkRaceIdValidityAndExecuteTask(req, res, _deleteOne);
+    }
+    _findRaceByIdAndCallBack(req, res, _deleteOne);
 }
 
 const fullUpdate = (req, res,) => {
