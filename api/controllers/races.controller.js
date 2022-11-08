@@ -6,6 +6,18 @@ const _sendResponse = (res, response) => {
     res.status(parseInt(response.status)).json(response.message);
 }
 
+
+const _findRaceByIdAndCallBack = (req, res, callBack) => {
+    const raceId = req.params.raceId;
+    if (mongoose.isValidObjectId(raceId)) {
+        Race.findById(raceId).exec((err, race) => {
+            callBack(req, res, err, race);
+        });
+    } else {
+        _sendResponse(res, { status: parseInt(process.env.BadRequestStatusCode), message: process.env.InvalidRaceIdMsg });
+    }
+}
+
 const _checkRaceIdValidityAndExecuteTask = (req, res, func) => {
     const raceId = req.params.raceId;
     if (mongoose.isValidObjectId(raceId)) {
@@ -44,23 +56,34 @@ const getAll = (req, res) => {
     }
 }
 
-const _getOne = (req, res, raceId) => {
-    Race.findById(raceId).exec((err, race) => {
-        let response = { status: process.env.OkStatusCode, message: race }
-        if (err) {
-            response.status = process.env.InternalServerErrorStatusCode;
-            response.message = err;
-        }
-        if (!race) {
-            response.status = process.env.ResourceNotFoundStatusCode;
-            response.message = process.env.RaceWithIdDoesnotExist;
-        }
-        _sendResponse(res, response);
-    });
+const _getOne = (req, res, err, race) => {
+    let response = { status: process.env.OkStatusCode, message: race }
+    if (err) {
+        response.status = process.env.InternalServerErrorStatusCode;
+        response.message = err;
+    }
+    if (!race) {
+        response.status = process.env.ResourceNotFoundStatusCode;
+        response.message = process.env.RaceWithIdDoesnotExist;
+    }
+    _sendResponse(res, response);
+    // Race.findById(raceId).exec((err, race) => {
+    //     let response = { status: process.env.OkStatusCode, message: race }
+    //     if (err) {
+    //         response.status = process.env.InternalServerErrorStatusCode;
+    //         response.message = err;
+    //     }
+    //     if (!race) {
+    //         response.status = process.env.ResourceNotFoundStatusCode;
+    //         response.message = process.env.RaceWithIdDoesnotExist;
+    //     }
+    //     _sendResponse(res, response);
+    // });
 }
 
 const getOne = (req, res) => {
-    _checkRaceIdValidityAndExecuteTask(req, res, _getOne);
+    _findRaceByIdAndCallBack(req, res, _getOne);
+    // _checkRaceIdValidityAndExecuteTask(req, res, _getOne);
 }
 
 const addOne = (req, res) => {
