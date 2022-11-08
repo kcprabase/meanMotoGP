@@ -1,13 +1,62 @@
+const { response } = require("express");
 const mongoose = require("mongoose");
 const Race = mongoose.model(process.env.RaceModel);
 
-const getAll = (req, res) => {
+
+const _showResponse = (res, response) => {
+    res.status(response.status).json(response.message);
+};
+
+const _findTeamsByRaceIdAndCallBack = (req, res, callBack) => {
     const raceId = req.params.raceId;
-    Race.findById(raceId).select("teams").exec((err, race) => {
-        const response = {status: process.env}
-        console.log("found teams", race.teams.length, "for race", race.circuitName);
-        res.status(process.env.OkStatusCode).json(race.teams);
-    });
+    if (mongoose.isValidObjectId(raceId)) {
+        Race.findById(raceId).exec((err, race) => {
+            callBack(req, res, err, race);
+        });
+    } else {
+        _sendResponse(res, { status: process.env.BadRequestStatusCode, message: process.env.InvalidRaceIdMsg });
+    }
+}
+
+const getAll = (req, res) => {
+    const _getAllTeamsCallBack = (req, res, err, race) => {
+        const response = { status: process.env.OkStatusCode, message: race };
+        if (err) {
+            response.status = process.env.InternalServerErrorStatusCode;
+            response.message = err;
+        }
+
+        if (race && (race.teams && race.teams.length > 0)) {
+            response.message = race.teams;
+        } else {
+            response.status = process.env.ResourceNotFoundStatusCode;
+            response.message = process.env.NoTeamsFoundMsg;
+        }
+        _showResponse(res, response);
+    }
+    _findTeamsByRaceIdAndCallBack(req, res, _getAllTeamsCallBack);
+
+    // const raceId = req.params.raceId;
+    // if (mongoose.isValidObjectId(raceId)) {
+    //     Race.findById(raceId).select(process.env.RaceTeamsSubDocumentName).exec((err, race) => {
+    //         const response = { status: process.env.OkStatusCode, message: race };
+    //         if (err) {
+    //             response.status = process.env.InternalServerErrorStatusCode;
+    //             response.message = err;
+    //         }
+
+    //         if (race && (race.teams && race.teams.length > 0)) {
+    //             response.message = race.teams;
+    //         } else {
+    //             response.status = process.env.ResourceNotFoundStatusCode;
+    //             response.message = process.env.NoTeamsFoundMsg;
+    //         }
+    //         _showResponse(res, response);
+    //     });
+    // } else {
+    //     _sendResponse(res, { status: process.env.BadRequestStatusCode, message: process.env.InvalidRaceIdMsg });
+    // }
+
 };
 
 
