@@ -87,20 +87,21 @@ const addOne = (req, res) => {
 };
 
 const deleteOne = (req, res) => {
+    // _checkRaceIdValidityAndExecuteTask(req, res, _deleteOne);
     const _deleteOne = (req, res, err, race) => {
         let response = {
             status: process.env.NoContentSuccessStatusCode,
             message: race
         };
+        if (err) {
+            response.status = process.env.InternalServerErrorStatusCode;
+            response.message = err;
+        }
         if (!race) {
             response.status = process.env.ResourceNotFoundStatusCode;
             response.message = process.env.RaceWithIdDoesnotExist;
         } else {
             race.delete();
-        }
-        if (err) {
-            response.status = process.env.InternalServerErrorStatusCode;
-            response.message = err;
         }
         _sendResponse(res, response);
     }
