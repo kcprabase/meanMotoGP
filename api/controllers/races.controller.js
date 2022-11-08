@@ -56,34 +56,20 @@ const getAll = (req, res) => {
     }
 }
 
-const _getOne = (req, res, err, race) => {
-    let response = { status: process.env.OkStatusCode, message: race }
-    if (err) {
-        response.status = process.env.InternalServerErrorStatusCode;
-        response.message = err;
-    }
-    if (!race) {
-        response.status = process.env.ResourceNotFoundStatusCode;
-        response.message = process.env.RaceWithIdDoesnotExist;
-    }
-    _sendResponse(res, response);
-    // Race.findById(raceId).exec((err, race) => {
-    //     let response = { status: process.env.OkStatusCode, message: race }
-    //     if (err) {
-    //         response.status = process.env.InternalServerErrorStatusCode;
-    //         response.message = err;
-    //     }
-    //     if (!race) {
-    //         response.status = process.env.ResourceNotFoundStatusCode;
-    //         response.message = process.env.RaceWithIdDoesnotExist;
-    //     }
-    //     _sendResponse(res, response);
-    // });
-}
-
 const getOne = (req, res) => {
+    const _getOne = (req, res, err, race) => {
+        let response = { status: process.env.OkStatusCode, message: race }
+        if (err) {
+            response.status = process.env.InternalServerErrorStatusCode;
+            response.message = err;
+        }
+        if (!race) {
+            response.status = process.env.ResourceNotFoundStatusCode;
+            response.message = process.env.RaceWithIdDoesnotExist;
+        }
+        _sendResponse(res, response);
+    }
     _findRaceByIdAndCallBack(req, res, _getOne);
-    // _checkRaceIdValidityAndExecuteTask(req, res, _getOne);
 }
 
 const addOne = (req, res) => {
