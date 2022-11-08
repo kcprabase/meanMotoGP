@@ -2,9 +2,9 @@ const mongoose = require("mongoose");
 const Race = mongoose.model(process.env.RaceModel);
 
 const getAll = (req, res) => {
-    console.log("GET all team controller");
     const raceId = req.params.raceId;
     Race.findById(raceId).select("teams").exec((err, race) => {
+        const response = {status: process.env}
         console.log("found teams", race.teams.length, "for race", race.circuitName);
         res.status(process.env.OkStatusCode).json(race.teams);
     });

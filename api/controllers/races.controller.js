@@ -13,7 +13,7 @@ const _findRaceByIdAndCallBack = (req, res, callBack) => {
             callBack(req, res, err, race);
         });
     } else {
-        _sendResponse(res, { status: parseInt(process.env.BadRequestStatusCode), message: process.env.InvalidRaceIdMsg });
+        _sendResponse(res, { status: process.env.BadRequestStatusCode, message: process.env.InvalidRaceIdMsg });
     }
 }
 
@@ -22,7 +22,7 @@ const _checkRaceIdValidityAndExecuteTask = (req, res, func) => {
     if (mongoose.isValidObjectId(raceId)) {
         func(req, res, raceId);
     } else {
-        _sendResponse(res, { status: parseInt(process.env.BadRequestStatusCode), message: process.env.InvalidRaceIdMsg });
+        _sendResponse(res, { status: process.env.BadRequestStatusCode, message: process.env.InvalidRaceIdMsg });
     }
 }
 
@@ -37,7 +37,7 @@ const getAll = (req, res) => {
             count = parseInt(req.query.count, 10);
         }
         if (count > parseInt(process.env.RacePageCountLimit)) {
-            _sendResponse(res, { status: parseInt(process.env.BadRequestStatusCode), message: process.env.RequestItemPerPageCountExceededMsg });
+            _sendResponse(res, { status: process.env.BadRequestStatusCode, message: process.env.RequestItemPerPageCountExceededMsg });
             return;
         }
         Race.find().skip(offset).limit(count).exec((err, races) => {
