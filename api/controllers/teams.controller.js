@@ -144,8 +144,6 @@ const _updateTeam = function (req, res, race) {
     }
     const updateIndex = race.teams.findIndex(team => team._id.equals(teamId));
     if (updateIndex >= 0) {
-        // race.teams[updateIndex] = { ...race.teams[updateIndex], ...teamToUpdateWith };
-        
         race.teams[updateIndex].riderName = teamToUpdateWith.riderName;
         race.teams[updateIndex].teamName = teamToUpdateWith.teamName;
         race.teams[updateIndex].rank = teamToUpdateWith.rank;
@@ -166,7 +164,7 @@ const _updateTeam = function (req, res, race) {
     }
 };
 
-const updateOne = (req, res) => {
+const fullUpdate = (req, res) => {
     console.log("Update one team Teams controller");
     const raceId = req.params.raceId;
     Race.findById(raceId).select("teams").exec((err, race) => {
@@ -189,5 +187,5 @@ const updateOne = (req, res) => {
 };
 
 module.exports = {
-    getOne, getAll, addOne, deleteOne, updateOne
+    getOne, getAll, addOne, deleteOne, fullUpdate
 }

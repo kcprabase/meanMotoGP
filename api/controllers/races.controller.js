@@ -1,5 +1,19 @@
+const { response } = require("express");
 const mongoose = require("mongoose");
 const Race = mongoose.model(process.env.RaceModel);
+
+const _sendResponse = (res, response) => {
+    res.status(parseInt(response.status)).json(response.message);
+}
+
+const _checkRaceIdValidityAndExecuteTask = (req, res, func) => {
+    const raceId = req.params.raceId;
+    if (mongoose.isValidObjectId(raceId)) {
+        func(req, res, raceId);
+    } else {
+        _sendResponse(res, { status: parseInt(process.env.BadRequestStatusCode), message: process.env.InvalidRaceIdMsg });
+    }
+}
 
 const getAll = (req, res) => {
     let offset = 0;
@@ -11,93 +25,148 @@ const getAll = (req, res) => {
         if (req.query.count) {
             count = parseInt(req.query.count, 10);
         }
+        if (count > parseInt(process.env.RacePageCountLimit)) {
+            _sendResponse(res, { status: parseInt(process.env.BadRequestStatusCode), message: process.env.RequestItemPerPageCountExceededMsg });
+            return;
+        }
         Race.find().skip(offset).limit(count).exec((err, races) => {
-            console.log("Found races", races.length);
-            res.status(process.env.OkStatusCode).json(races);
+            const response = { status: process.env.OkStatusCode, message: races };
+            if (err) {
+                response.status = process.env.InternalServerErrorStatusCode;
+                response.message = process.env.ErrorWhileFetchingRaceMsg;
+            }
+            if (!races) {
+                response.status = process.env.ResourceNotFoundStatusCode;
+                response.message = process.env.RaceNotFoundMsg;
+            }
+            _sendResponse(res, response);
         });
     }
 }
 
-const getOne = (req, res) => {
-    const raceId = req.params.raceId;
+const _getOne = (req, res, raceId) => {
     Race.findById(raceId).exec((err, race) => {
         let response = { status: process.env.OkStatusCode, message: race }
         if (err) {
-            console.log("error while fetching race");
             response.status = process.env.InternalServerErrorStatusCode;
             response.message = err;
         }
         if (!race) {
             response.status = process.env.ResourceNotFoundStatusCode;
-            response.message = "Race with given Id doesnot exist";
+            response.message = process.env.RaceWithIdDoesnotExist;
         }
-        res.status(response.status).json(response.message);
+        _sendResponse(res, response);
     });
 }
 
+const getOne = (req, res) => {
+    _checkRaceIdValidityAndExecuteTask(req, res, _getOne);
+}
+
 const addOne = (req, res) => {
-    console.log("Race add one request");
     const newRace = {
         circuitName: req.body.circuitName,
         season: req.body.season,
-        winner: req.body.winner,
+        winner: req.body.winner
     };
     Race.create(newRace, (err, race) => {
-        let response = { status: 201, message: race };
+        let response = { status: process.env.CreateSuccessStatusCode, message: race };
         if (err) {
-            console.log("error creating race");
             response = { status: process.env.InternalServerErrorStatusCode, message: err };
         }
         res.status(response.status).json(response.message);
     });
 };
 
-const deleteOne = function (req, res) {
-    const raceId = req.params.raceId;
+const _deleteOne = (req, res, raceId) => {
     Race.findByIdAndDelete(raceId).exec((err, deletedRace) => {
-        let response = { status: process.env.CreateSuccessStatusCode, message: deletedRace };
+        let response = { status: process.env.NoContentSuccessStatusCode, message: deletedRace };
         if (err) {
-            console.log("Error finding race");
             response.status = process.env.InternalServerErrorStatusCode;
             response.message = err;
         } else if (!deletedRace) {
-            console.log("Race id not found");
             response.status = process.env.ResourceNotFoundStatusCode;
-            response.message = {
-                "message": "Race ID not found"
-            };
-        } else {
-            response.message = "Race deleted"
+            response.message = process.env.RaceIdNotFound;
         }
-        res.status(response.status).json(response.message);
+        _sendResponse(res, response);
     });
 }
 
+const deleteOne = (req, res) => {
+    _checkRaceIdValidityAndExecuteTask(req, res, _deleteOne);
+}
 
-const udpateOne = function (req, res) {
-    console.log("update called", req.body)
+const fullUpdate = (req, res,) => {
     const raceId = req.params.raceId;
-    const raceToUdpateWith = {
-        circuitName: req.body.circuitName,
-        season: req.body.season,
-        winner: req.body.winner,
-    };
-    Race.findByIdAndUpdate(raceId, raceToUdpateWith).exec((err, udpatedRace) => {
-        let response = { status: process.env.NoContentSuccessStatusCode, message: udpatedRace };
-        if (err) {
-            console.log("Error finding race");
-            response.status = process.env.InternalServerErrorStatusCode;
-            response.message = err;
-        } else if (!udpatedRace) {
-            console.log("Race id not found");
-            response.status = process.env.ResourceNotFoundStatusCode;
-            response.message = {
-                "message": "Race ID not found."
+    if (mongoose.isValidObjectId(raceId)) {
+        Race.findById(raceId).exec((err, race) => {
+            let response = {
+                status: process.env.NoContentSuccessStatusCode,
+                message: race
             };
-        }
-        console.log("update success ful", raceToUdpateWith, "and", udpatedRace);
-        res.status(response.status).json(response.message);
-    });
+            if (err) {
+                response.status = process.env.InternalServerErrorStatusCode;
+                response.message = err;
+            }
+            if (!race) {
+                response.status = process.env.ResourceNotFoundStatusCode;
+                response.message = process.env.RaceIdNotFound;
+            }
+            if (response.status !== process.env.NoContentSuccessStatusCode) {
+                _sendResponse(res, response);
+            } else {
+                race.circuitName = req.body.circuitName;
+                race.season = req.body.season;
+                race.winner = req.body.winner;
+                race.save((err, updatedGame) => {
+                    response.message = updatedGame;
+                    if (err) {
+                        response.status = process.env.InternalServerErrorStatusCode;
+                        response.message = err;
+                    }
+                    _sendResponse(res, response);
+                });
+            }
+        });
+    } else {
+        _sendResponse(res, { status: parseInt(process.env.BadRequestStatusCode), message: process.env.InvalidRaceIdMsg });
+    }
 }
 
-module.exports = { getAll, getOne, addOne, deleteOne, udpateOne };
+const partialUpdate = (req, res) => {
+    const raceId = req.params.raceId;
+    if (mongoose.isValidObjectId(raceId)) {
+        Race.findById(raceId).exec((err, race) => {
+            let response = {
+                status: process.env.NoContentSuccessStatusCode,
+                message: race
+            };
+            if (err) {
+                response.status = process.env.InternalServerErrorStatusCode;
+                response.message = err;
+            }
+            if (!race) {
+                response.status = process.env.ResourceNotFoundStatusCode;
+                response.message = process.env.RaceIdNotFound;
+            }
+            if (response.status !== process.env.NoContentSuccessStatusCode) {
+                _sendResponse(res, response);
+            } else {
+                if (req.body.circuitName) race.circuitName = req.body.circuitName;
+                if (req.body.season) race.season = req.body.season;
+                if (req.body.winner) race.winner = req.body.winner;
+                race.save((err, updatedGame) => {
+                    if (err) {
+                        response.status = process.env.InternalServerErrorStatusCode;
+                        response.message = err;
+                    }
+                    _sendResponse(res, response);
+                });
+            }
+        });
+    } else {
+        _sendResponse(res, { status: parseInt(process.env.BadRequestStatusCode), message: process.env.InvalidRaceIdMsg });
+    }
+}
+
+module.exports = { getAll, getOne, addOne, deleteOne, fullUpdate, partialUpdate };

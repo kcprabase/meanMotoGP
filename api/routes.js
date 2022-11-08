@@ -9,14 +9,15 @@ router.route("/races")
 router.route("/races/:raceId")
     .get(raceController.getOne)
     .delete(raceController.deleteOne)
-    .put(raceController.udpateOne);
+    .put(raceController.fullUpdate)
+    .patch(raceController.partialUpdate);
 router.route("/races/:raceId/teams")
     .get(teamController.getAll)
     .post(teamController.addOne);
 router.route("/races/:raceId/teams/:teamId")
     .get(teamController.getOne)
     .delete(teamController.deleteOne)
-    .put(teamController.updateOne);
+    .put(teamController.fullUpdate);
 
 module.exports = router;
 
