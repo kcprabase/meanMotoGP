@@ -1,4 +1,3 @@
-const { response } = require("express");
 const mongoose = require("mongoose");
 const Race = mongoose.model(process.env.RaceModel);
 
@@ -7,7 +6,7 @@ const _sendResponse = (res, response) => {
     res.status(parseInt(response.status)).json(response.message);
 };
 
-const _findTeamsByRaceIdAndCallBack = (req, res, callBack) => {
+const _findRaceByIdAndCallBack = (req, res, callBack) => {
     const raceId = req.params.raceId;
     if (mongoose.isValidObjectId(raceId)) {
         Race.findById(raceId).select("teams").exec((err, race) => {
@@ -19,19 +18,40 @@ const _findTeamsByRaceIdAndCallBack = (req, res, callBack) => {
             if (!race) {
                 response.status = process.env.ResourceNotFoundStatusCode;
                 response.message = process.env.RaceIdNotFound;
-            } else if (race.teams && race.teams.length > 0) {
-                //CALLBACK
-                callBack(req, res, response, race.teams);
-                return;
             } else {
-                response.status = process.env.ResourceNotFoundStatusCode;
-                response.message = process.env.NoTeamsFoundMsg;
+                //CALLBACK
+                callBack(req, res, response, race);
+                return;
             }
+
+            // else if (race.teams && race.teams.length > 0) {
+            //     //CALLBACK
+            //     callBack(req, res, response, race.teams);
+            //     return;
+            // } else {
+            //     response.status = process.env.ResourceNotFoundStatusCode;
+            //     response.message = process.env.NoTeamsFoundMsg;
+            // }
             _sendResponse(res, response);
         });
     } else {
         _sendResponse(res, { status: process.env.BadRequestStatusCode, message: process.env.InvalidRaceIdMsg });
     }
+}
+
+const _findTeamsByRaceIdAndCallBack = (req, res, callBack) => {
+    const _getTeams = (req, res, response, race) => {
+        if (race.teams && race.teams.length > 0) {
+            //CALLBACK
+            callBack(req, res, response, race.teams);
+            return;
+        } else {
+            response.status = process.env.ResourceNotFoundStatusCode;
+            response.message = process.env.NoTeamsFoundMsg;
+        }
+    }
+
+    _findRaceByIdAndCallBack(req, res, _getTeams);
 }
 
 const getAll = (req, res) => {
