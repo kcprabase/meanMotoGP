@@ -1,3 +1,4 @@
+const { response } = require("express");
 const mongoose = require("mongoose");
 const Race = mongoose.model(process.env.RaceModel);
 
@@ -10,7 +11,23 @@ const _findTeamsByRaceIdAndCallBack = (req, res, callBack) => {
     const raceId = req.params.raceId;
     if (mongoose.isValidObjectId(raceId)) {
         Race.findById(raceId).select("teams").exec((err, race) => {
-            callBack(req, res, err, race);
+            const response = { status: process.env.OkStatusCode, message: race };
+            if (err) {
+                response.status = process.env.InternalServerErrorStatusCode;
+                response.message = err;
+            }
+            if (!race) {
+                response.status = process.env.ResourceNotFoundStatusCode;
+                response.message = process.env.RaceIdNotFound;
+            } else if (race.teams && race.teams.length > 0) {
+                //CALLBACK
+                callBack(req, res, response, race.teams);
+                return;
+            } else {
+                response.status = process.env.ResourceNotFoundStatusCode;
+                response.message = process.env.NoTeamsFoundMsg;
+            }
+            _sendResponse(res, response);
         });
     } else {
         _sendResponse(res, { status: process.env.BadRequestStatusCode, message: process.env.InvalidRaceIdMsg });
@@ -18,21 +35,8 @@ const _findTeamsByRaceIdAndCallBack = (req, res, callBack) => {
 }
 
 const getAll = (req, res) => {
-    const _getAllTeamsCallBack = (req, res, err, race) => {
-        const response = { status: process.env.OkStatusCode, message: race };
-        if (err) {
-            response.status = process.env.InternalServerErrorStatusCode;
-            response.message = err;
-        }
-        if (!race) {
-            response.status = process.env.ResourceNotFoundStatusCode;
-            response.message = process.env.RaceIdNotFound;
-        } else if (race.teams && race.teams.length > 0) {
-            response.message = race.teams;
-        } else {
-            response.status = process.env.ResourceNotFoundStatusCode;
-            response.message = process.env.NoTeamsFoundMsg;
-        }
+    const _getAllTeamsCallBack = (req, res, response, teams) => {
+        response.message = teams;
         _sendResponse(res, response);
     }
     _findTeamsByRaceIdAndCallBack(req, res, _getAllTeamsCallBack);
@@ -41,54 +45,23 @@ const getAll = (req, res) => {
 
 
 const getOne = (req, res) => {
-    const _getOneTeamCallBack = (req, res, err, race) => {
+    const _getOneTeamCallBack = (req, res, response, teams) => {
         const teamId = req.params.teamId;
         if (mongoose.isValidObjectId(teamId)) {
-            const response = { status: process.env.OkStatusCode, message: race };
-            if (err) {
-                response.status = process.env.InternalServerErrorStatusCode;
-                response.message = err;
-            } else if (!race) {
-                response.status = process.env.ResourceNotFoundStatusCode;
-                response.message = process.env.RaceIdNotFound
-            } else if (race.teams && race.teams.id(teamId)) {
+            if (teams.id(teamId)) {
                 response.status = process.env.OkStatusCode;
-                response.message = race.teams.id(teamId);
+                response.message = teams.id(teamId);
             } else {
                 response.status = process.env.ResourceNotFoundStatusCode;
                 response.message = process.env.TeamIdNotFound;
             }
-            res.status(response.status).json(response.message);
+            _sendResponse(res, response);
         } else {
             _sendResponse(res, { status: process.env.BadRequestStatusCode, message: process.env.InvalidTeamIdMsg });
         }
-
     }
 
     _findTeamsByRaceIdAndCallBack(req, res, _getOneTeamCallBack);
-
-    // console.log("GET ONE team controller");
-    // const raceId = req.params.raceId;
-    // const teamId = req.params.teamId;
-    // console.log("raceid", raceId, "teamId", teamId);
-    // Race.findById(raceId).select("teams").exec((err, race) => {
-    //     const response = { status: process.env.OkStatusCode, message: race };
-    //     if (err) {
-    //         response.status = process.env.InternalServerErrorStatusCode;
-    //         response.message = err;
-    //     } else if (!race) {
-    //         response.status = process.env.ResourceNotFoundStatusCode;
-    //         response.message = "Race do not exist for given RaceId."
-    //     } else if (race.teams && race.teams.id(teamId)) {
-    //         response.status = process.env.OkStatusCode;
-    //         response.message = race.teams.id(teamId);
-    //     } else {
-    //         response.status = process.env.ResourceNotFoundStatusCode;
-    //         response.message = "Team do not exist for given TeamId."
-    //     }
-    //     // console.log("found team.", race.teams.id(teamId), "for race", race);
-    //     res.status(response.status).json(response.message);
-    // });
 };
 
 const _addTeam = (req, res, race) => {
