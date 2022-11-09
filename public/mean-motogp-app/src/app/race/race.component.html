@@ -1,0 +1,7 @@
+<ng-container *ngIf="race">
+    <h1>{{race.circuitName}}</h1>
+    <br />
+    Season: {{race.season}} <br />
+    Winner: {{race.winner}} <br />
+    No. of Teams: <span *ngIf="race.teams">{{race.teams.length}}</span>
+</ng-container>
