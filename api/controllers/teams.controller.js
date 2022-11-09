@@ -20,18 +20,10 @@ const _findRaceByIdAndCallBack = (req, res, callBack) => {
                 response.message = process.env.RaceIdNotFound;
             } else {
                 //CALLBACK
+                console.log("before call back ", race);
                 callBack(req, res, response, race);
                 return;
             }
-
-            // else if (race.teams && race.teams.length > 0) {
-            //     //CALLBACK
-            //     callBack(req, res, response, race.teams);
-            //     return;
-            // } else {
-            //     response.status = process.env.ResourceNotFoundStatusCode;
-            //     response.message = process.env.NoTeamsFoundMsg;
-            // }
             _sendResponse(res, response);
         });
     } else {
@@ -84,50 +76,32 @@ const getOne = (req, res) => {
     _findTeamsByRaceIdAndCallBack(req, res, _getOneTeamCallBack);
 };
 
-const _addTeam = (req, res, race) => {
-    const newTeam = {
-        riderName: req.body.riderName,
-        teamName: req.body.teamName,
-        rank: req.body.rank
-    };
-    if (!race.teams) {
-        race.teams = [];
-    }
-    race.teams.push(newTeam);
-    race.save((err, updatedRace) => {
-        const response = { status: process.env.OkStatusCode, message: [] };
-        if (err) {
-            console.log("error here", err);
-            response.status = process.env.InternalServerErrorStatusCode;
-            response.message = err;
-        } else {
-            response.status = process.env.CreateSuccessStatusCode;
-            response.message = updatedRace.teams
-        }
-        res.status(response.status).json(response.message);
-    });
-};
-
 const addOne = (req, res) => {
-    console.log("Add one team Teams controller");
-    const raceId = req.params.raceId;
-    Race.findById(raceId).select("teams").exec((err, race) => {
-        console.log("found race", race);
-        let response = { status: process.env.OkStatusCode, message: race };
-        if (err) {
-            console.log("error finding race");
-            response = { status: process.env.InternalServerErrorStatusCode, message: err };
-        } else if (!race) {
-            console.log("Race with given Id not found");
-            response = { status: process.env.ResourceNotFoundStatusCode, message: "Race with given Id not found" };
+    const _addTeam = (req, res, response, race) => {
+        console.log("Race to add team", race);
+        const newTeam = {
+            riderName: req.body.riderName,
+            teamName: req.body.teamName,
+            rank: req.body.rank
+        };
+        if (!race.teams) {
+            race.teams = [];
         }
-        if (race) {
-            _addTeam(req, res, race);
-        } else {
+        race.teams.push(newTeam);
+        race.save((err, updatedRace) => {
+            response = { status: process.env.OkStatusCode, message: [] };
+            if (err) {
+                console.log("error here", err);
+                response.status = process.env.InternalServerErrorStatusCode;
+                response.message = err;
+            } else {
+                response.status = process.env.CreateSuccessStatusCode;
+                response.message = updatedRace.teams
+            }
             res.status(response.status).json(response.message);
-        }
-    });
-
+        });
+    };
+    _findRaceByIdAndCallBack(req, res, _addTeam);
 };
 
 const _deleteTeam = function (req, res, race) {
