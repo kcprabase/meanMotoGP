@@ -1,4 +1,5 @@
 const express = require("express");
+var cors = require('cors');
 require("dotenv").config();
 require("./api/data/db");
 const routes = require("./api/routes");
@@ -10,11 +11,18 @@ app.use((req, res, next) => {
     console.log("REC_", req.method, req.url);
     next();
 });
-app.use("/api", (req, res, next) => {
-    res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
-    // res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    next();
-});
+
+let corsOptions = {
+    origin: 'http://localhost:4200'
+}
+app.use(cors(corsOptions));
+// app.use("/api", (req, res, next) => {
+//     console.log("i'm here", req.method);
+//     // res.header('Access-Control-Allow-Origin', '*');
+//     res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
+//     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+//     next();
+// });
 
 app.use((err, req, res, next) => {
     console.error("ERR_", err);

@@ -1,3 +1,10 @@
 <ul>
-    <li *ngFor="let race of races"><a [routerLink]="[race._id]">{{race.circuitName}} - {{race.season}}</a></li>
+    <li *ngFor="let race of races">
+        <a [routerLink]="[race._id]">
+            {{race.circuitName}} - {{race.season}}
+        </a>
+        <button (click)="onDeleteClick(race._id)">
+            &#9746;
+        </button>
+    </li>
 </ul>

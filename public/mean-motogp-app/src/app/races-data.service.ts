@@ -21,4 +21,11 @@ export class RacesDataService {
     return this._http
       .get<Race>(`${this._baseUrl}/races/${raceId}`);
   }
+
+  public deleteRace(raceId: string): any {
+    const headers = { 'Access-Control-Allow-Origin': '*' };
+    return this._http.delete<void>(`${this._baseUrl}/races/${raceId}`
+      , { headers: headers }
+    );
+  }
 }

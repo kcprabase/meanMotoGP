@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http'
+import { ReactiveFormsModule } from '@angular/forms';
 
 import { AppComponent } from './app.component';
 import { FooterComponent } from './footer/footer.component';
@@ -26,6 +27,7 @@ import { RegisterComponent } from './register/register.component';
   imports: [
     BrowserModule,
     HttpClientModule,
+    ReactiveFormsModule,
     RouterModule.forRoot([
       {
         path: "",
@@ -38,6 +40,10 @@ import { RegisterComponent } from './register/register.component';
       {
         path: "races/:raceId",
         component: RaceComponent
+      },
+      {
+        path: "register",
+        component: RegisterComponent
       },
       {
         path: "**",
