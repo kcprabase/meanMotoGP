@@ -142,31 +142,54 @@ const deleteOne = (req, res) => {
     // _findRaceByIdAndCallBack(req, res, _deleteTeam);
 };
 
-const _updateTeamFull = function (req, res, response, race, updateIndex) {
-    console.log("here ", req.body);
-    if (req.body) {
-        const teamToUpdateWith = {
-            riderName: req.body.riderName,
-            teamName: req.body.teamName,
-            rank: req.body.rank
-        }
-        race.teams[updateIndex].riderName = teamToUpdateWith.riderName;
-        race.teams[updateIndex].teamName = teamToUpdateWith.teamName;
-        race.teams[updateIndex].rank = teamToUpdateWith.rank;
+const _updateOneTeam = (req, res, response, race, updateIndex) => {
+    if (Object.keys(req.body).length > 0) {
+        race.teams[updateIndex].riderName = req.body.riderName;
+        race.teams[updateIndex].teamName = req.body.teamName;
+        race.teams[updateIndex].rank = req.body.rank;
         _saveRace(res, response, race);
     } else {
         response.status = process.env.BadRequestStatusCode;
         response.message = process.env.RequestBodyNotFound;
         _sendResponse(res, response);
     }
+};
 
+const _updateTeamFull = (req, res, response, race, updateIndex) => {
+    if (Object.keys(req.body).length > 0) {
+        race.teams[updateIndex].riderName = req.body.riderName;
+        race.teams[updateIndex].teamName = req.body.teamName;
+        race.teams[updateIndex].rank = req.body.rank;
+        _saveRace(res, response, race);
+    } else {
+        response.status = process.env.BadRequestStatusCode;
+        response.message = process.env.RequestBodyNotFound;
+        _sendResponse(res, response);
+    }
+};
+
+const _updateTeamPartial = (req, res, response, race, updateIndex) => {
+    if (Object.keys(req.body).length > 0) {
+        console.log("NO body", req.body);
+        if (req.body.riderName) race.teams[updateIndex].riderName = req.body.riderName
+        if (req.body.teamName) race.teams[updateIndex].teamName = req.body.teamName;
+        if (req.body.rank) race.teams[updateIndex].rank = req.body.rank;
+        _saveRace(res, response, race);
+    } else {
+        response.status = process.env.BadRequestStatusCode;
+        response.message = process.env.RequestBodyNotFound;
+        _sendResponse(res, response);
+    }
 };
 
 const fullUpdate = (req, res) => {
     _findTeamByIdAndCallBack(req, res, _updateTeamFull);
+};
 
+const partialUpdate = (req, res) => {
+    _findTeamByIdAndCallBack(req, res, _updateTeamPartial);
 };
 
 module.exports = {
-    getOne, getAll, addOne, deleteOne, fullUpdate
+    getOne, getAll, addOne, deleteOne, fullUpdate, partialUpdate
 }

@@ -17,7 +17,8 @@ router.route("/races/:raceId/teams")
 router.route("/races/:raceId/teams/:teamId")
     .get(teamController.getOne)
     .delete(teamController.deleteOne)
-    .put(teamController.fullUpdate);
+    .put(teamController.fullUpdate)
+    .patch(teamController.partialUpdate);
 
 module.exports = router;
 
