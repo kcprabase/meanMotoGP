@@ -10,6 +10,7 @@ import { HomeComponent } from './home/home.component';
 import { RacesComponent } from './races/races.component';
 import { RaceComponent } from './race/race.component';
 import { ErrorPageComponent } from './error-page/error-page.component';
+import { RegisterComponent } from './register/register.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import { ErrorPageComponent } from './error-page/error-page.component';
     HomeComponent,
     RacesComponent,
     RaceComponent,
-    ErrorPageComponent
+    ErrorPageComponent,
+    RegisterComponent
   ],
   imports: [
     BrowserModule,

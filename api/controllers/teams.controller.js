@@ -1,4 +1,3 @@
-const { response } = require("express");
 const mongoose = require("mongoose");
 const Race = mongoose.model(process.env.RaceModel);
 
@@ -153,9 +152,7 @@ const _updateOneTeam = (req, res, response, race, updateIndex, updateCallBack) =
 };
 
 const _updateTeamFull = (req, res, response, race, updateIndex) => {
-    console.log("update partial");
     _updateOneTeam(req, res, response, race, updateIndex, (req, race, updateIndex) => {
-        console.log("update partial two");
         race.teams[updateIndex].riderName = req.body.riderName;
         race.teams[updateIndex].teamName = req.body.teamName;
         race.teams[updateIndex].rank = req.body.rank;
