@@ -1,3 +1,4 @@
+const { response } = require("express");
 const mongoose = require("mongoose");
 const Race = mongoose.model(process.env.RaceModel);
 
@@ -7,10 +8,9 @@ const _sendResponse = (res, response) => {
 };
 
 const _findRaceByIdAndCallBack = (req, res, callBack) => {
-    console.log("params", req.params);
     const raceId = req.params.raceId;
     if (mongoose.isValidObjectId(raceId)) {
-        Race.findById(raceId).select("teams").exec((err, race) => {
+        Race.findById(raceId).select(process.env.RaceTeamsSubDocumentName).exec((err, race) => {
             const response = { status: process.env.OkStatusCode, message: race };
             if (err) {
                 response.status = process.env.InternalServerErrorStatusCode;
@@ -139,14 +139,11 @@ const deleteOne = (req, res) => {
         _saveRace(res, response, race);
     };
     _findTeamByIdAndCallBack(req, res, _deleteTeam);
-    // _findRaceByIdAndCallBack(req, res, _deleteTeam);
 };
 
-const _updateOneTeam = (req, res, response, race, updateIndex) => {
+const _updateOneTeam = (req, res, response, race, updateIndex, updateCallBack) => {
     if (Object.keys(req.body).length > 0) {
-        race.teams[updateIndex].riderName = req.body.riderName;
-        race.teams[updateIndex].teamName = req.body.teamName;
-        race.teams[updateIndex].rank = req.body.rank;
+        updateCallBack(req, race, updateIndex);
         _saveRace(res, response, race);
     } else {
         response.status = process.env.BadRequestStatusCode;
@@ -156,30 +153,21 @@ const _updateOneTeam = (req, res, response, race, updateIndex) => {
 };
 
 const _updateTeamFull = (req, res, response, race, updateIndex) => {
-    if (Object.keys(req.body).length > 0) {
+    console.log("update partial");
+    _updateOneTeam(req, res, response, race, updateIndex, (req, race, updateIndex) => {
+        console.log("update partial two");
         race.teams[updateIndex].riderName = req.body.riderName;
         race.teams[updateIndex].teamName = req.body.teamName;
         race.teams[updateIndex].rank = req.body.rank;
-        _saveRace(res, response, race);
-    } else {
-        response.status = process.env.BadRequestStatusCode;
-        response.message = process.env.RequestBodyNotFound;
-        _sendResponse(res, response);
-    }
+    });
 };
 
 const _updateTeamPartial = (req, res, response, race, updateIndex) => {
-    if (Object.keys(req.body).length > 0) {
-        console.log("NO body", req.body);
+    _updateOneTeam(req, res, response, race, updateIndex, (req, race, updateIndex) => {
         if (req.body.riderName) race.teams[updateIndex].riderName = req.body.riderName
         if (req.body.teamName) race.teams[updateIndex].teamName = req.body.teamName;
         if (req.body.rank) race.teams[updateIndex].rank = req.body.rank;
-        _saveRace(res, response, race);
-    } else {
-        response.status = process.env.BadRequestStatusCode;
-        response.message = process.env.RequestBodyNotFound;
-        _sendResponse(res, response);
-    }
+    });
 };
 
 const fullUpdate = (req, res) => {
