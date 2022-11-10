@@ -7,6 +7,7 @@ const _sendResponse = (res, response) => {
 };
 
 const _findRaceByIdAndCallBack = (req, res, callBack) => {
+    console.log("params", req.params);
     const raceId = req.params.raceId;
     if (mongoose.isValidObjectId(raceId)) {
         Race.findById(raceId).select("teams").exec((err, race) => {
@@ -43,6 +44,29 @@ const _findTeamsByRaceIdAndCallBack = (req, res, callBack) => {
     }
 
     _findRaceByIdAndCallBack(req, res, _getTeams);
+}
+
+const _findTeamByIdAndCallBack = (req, res, callBack) => {
+    const _getTeamById = function (req, res, response, race) {
+        const teamId = req.params.teamId;
+        if (mongoose.isValidObjectId(teamId)) {
+            const teamIndex = race.teams.findIndex(team => team._id.equals(teamId));
+            if (teamIndex >= 0) {
+                // race.teams.splice(teamIndex, 1);
+                // response.status = process.env.NoContentSuccessStatusCode;
+                // _saveRace(res, response, race);
+                //CALLBACK
+                callBack(req, res, response, race, teamIndex);
+            } else {
+                response.status = process.env.ResourceNotFoundStatusCode;
+                response.message = process.env.TeamIdNotFound;
+                _sendResponse(res, response);
+            }
+        } else {
+            _sendResponse(res, { status: process.env.BadRequestStatusCode, message: process.env.InvalidTeamIdMsg });
+        }
+    };
+    _findRaceByIdAndCallBack(req, res, _getTeamById);
 }
 
 
@@ -108,100 +132,38 @@ const addOne = (req, res) => {
     _findRaceByIdAndCallBack(req, res, _addTeam);
 };
 
-const _deleteTeam = function (req, res, response, race) {
-    const teamId = req.params.teamId;
-    if (mongoose.isValidObjectId(teamId)) {
-        const removeIndex = race.teams.findIndex(team => team._id.equals(teamId));
-        if (removeIndex >= 0) {
-            race.teams.splice(removeIndex, 1);
-            response.status = process.env.NoContentSuccessStatusCode;
-            _saveRace(res, response, race);
-        } else {
-            response.status = process.env.ResourceNotFoundStatusCode;
-            response.message = process.env.TeamIdNotFound;
-            _sendResponse(res, response);
-        }
-    } else {
-        _sendResponse(res, { status: process.env.BadRequestStatusCode, message: process.env.InvalidTeamIdMsg });
-    }
-};
-
 const deleteOne = (req, res) => {
-
-    _findRaceByIdAndCallBack(req, res, _deleteTeam);
-    // console.log("Delete one team Teams controller");
-    // const raceId = req.params.raceId;
-    // Race.findById(raceId).select("teams").exec((err, race) => {
-    //     console.log("found race", race);
-    //     let response = { status: process.env.OkStatusCode, message: race };
-    //     if (err) {
-    //         console.log("error finding race");
-    //         response = { status: process.env.InternalServerErrorStatusCode, message: err };
-    //     } else if (!race) {
-    //         console.log("Race with given Id not found");
-    //         response = { status: process.env.ResourceNotFoundStatusCode, message: "Race with given Id not found" };
-    //     }
-    //     if (race) {
-    //         _deleteTeam(req, res, race);
-    //     } else {
-    //         res.status(response.status).json(response.message);
-    //     }
-    // });
-
+    const _deleteTeam = function (req, res, response, race, teamIndex) {
+        race.teams.splice(teamIndex, 1);
+        response.status = process.env.NoContentSuccessStatusCode;
+        _saveRace(res, response, race);
+    };
+    _findTeamByIdAndCallBack(req, res, _deleteTeam);
+    // _findRaceByIdAndCallBack(req, res, _deleteTeam);
 };
 
-const _updateTeam = function (req, res, race) {
-    let response = {
-        status: 201,
-        message: []
-    };
-    const teamId = req.params.teamId;
-    const teamToUpdateWith = {
-        riderName: req.body.riderName,
-        teamName: req.body.teamName,
-        rank: req.body.rank
-    }
-    const updateIndex = race.teams.findIndex(team => team._id.equals(teamId));
-    if (updateIndex >= 0) {
+const _updateTeamFull = function (req, res, response, race, updateIndex) {
+    console.log("here ", req.body);
+    if (req.body) {
+        const teamToUpdateWith = {
+            riderName: req.body.riderName,
+            teamName: req.body.teamName,
+            rank: req.body.rank
+        }
         race.teams[updateIndex].riderName = teamToUpdateWith.riderName;
         race.teams[updateIndex].teamName = teamToUpdateWith.teamName;
         race.teams[updateIndex].rank = teamToUpdateWith.rank;
-        race.save(function (err, updatedRace) {
-            if (err) {
-                response.status = 500;
-                response.message = err;
-            } else {
-                response.status = 201;
-                response.message = updatedRace.teams;
-            }
-            res.status(response.status).json(response.message);
-        });
+        _saveRace(res, response, race);
     } else {
-        response.status = process.env.ResourceNotFoundStatusCode;
-        response.message = "Team with given id doesnot exist";
-        res.status(response.status).json(response.message);
+        response.status = process.env.BadRequestStatusCode;
+        response.message = process.env.RequestBodyNotFound;
+        _sendResponse(res, response);
     }
+
 };
 
 const fullUpdate = (req, res) => {
-    console.log("Update one team Teams controller");
-    const raceId = req.params.raceId;
-    Race.findById(raceId).select("teams").exec((err, race) => {
-        console.log("found race", race);
-        let response = { status: process.env.OkStatusCode, message: race };
-        if (err) {
-            console.log("error finding race");
-            response = { status: process.env.InternalServerErrorStatusCode, message: err };
-        } else if (!race) {
-            console.log("Race with given Id not found");
-            response = { status: process.env.ResourceNotFoundStatusCode, message: "Race with given Id not found" };
-        }
-        if (race) {
-            _updateTeam(req, res, race);
-        } else {
-            res.status(response.status).json(response.message);
-        }
-    });
+    _findTeamByIdAndCallBack(req, res, _updateTeamFull);
 
 };
 
