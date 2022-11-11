@@ -1,0 +1,6 @@
+<form *ngIf="method == 'post' || ( method=='put' && race)" (ngSubmit)="onSubmit()" #raceForm="ngForm">
+    <label>Circuit Name: <input name="circuitName" [(ngModel)]="race.circuitName" /></label><br />
+    <label>Season: <input name="season" type="number" [(ngModel)]="race.season" /></label><br />
+    <label>Winner: <input name="winner" [(ngModel)]="race.winner" /></label><br />
+    <button type="submit">Save</button>
+</form>

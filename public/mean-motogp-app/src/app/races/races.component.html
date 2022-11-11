@@ -1,8 +1,14 @@
+<br /><br />
+<button routerLink="/races/add">Add Race</button>
+
 <ul>
     <li *ngFor="let race of races">
         <a [routerLink]="[race._id]">
             {{race.circuitName}} - {{race.season}}
         </a>
+        <button (click)="onUpdateClick(race._id)">
+            &#9998;
+        </button>
         <button (click)="onDeleteClick(race._id)">
             &#9746;
         </button>

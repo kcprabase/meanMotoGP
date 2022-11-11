@@ -28,4 +28,13 @@ export class RacesDataService {
       , { headers: headers }
     );
   }
+
+  public addRace(race: Race): Observable<Race> {
+    return this._http.post<Race>(`${this._baseUrl}/races`, race);
+  }
+
+  public updateRace(raceId: string, race: Race): Observable<Race> {
+    console.log("race", race, "raceId", raceId);
+    return this._http.put<Race>(`${this._baseUrl}/races/${raceId}`, race);
+  }
 }
