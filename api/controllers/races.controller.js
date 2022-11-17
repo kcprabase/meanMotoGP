@@ -1,4 +1,3 @@
-const { response } = require("express");
 const mongoose = require("mongoose");
 const Race = mongoose.model(process.env.RaceModel);
 
@@ -54,12 +53,12 @@ const getAll = (req, res) => {
         }
         let response = { status: process.env.OkStatusCode, message: {} };
         Race.find().skip(offset).limit(count).exec().then(races => {
-            // if (!races || races.length == 0) {
-            //     response.status = process.env.ResourceNotFoundStatusCode;
-            //     response.message = process.env.RaceNotFoundMsg;
-            // } else {
-            response = { status: process.env.OkStatusCode, message: races };
-            // }
+            if (!races || races.length == 0) {
+                response.status = process.env.ResourceNotFoundStatusCode;
+                response.message = process.env.RaceNotFoundMsg;
+            } else {
+                response = { status: process.env.OkStatusCode, message: races };
+            }
         }).catch(err => {
             console.log(err);
             response.status = process.env.InternalServerErrorStatusCode;
@@ -103,18 +102,27 @@ const getOne = (req, res) => {
 }
 
 const addOne = (req, res) => {
+    let response = { status: process.env.CreateSuccessStatusCode, message: {} };
     const newRace = {
         circuitName: req.body.circuitName,
         season: req.body.season,
         winner: req.body.winner
     };
-    Race.create(newRace, (err, race) => {
-        let response = { status: process.env.CreateSuccessStatusCode, message: race };
-        if (err) {
-            response = { status: process.env.InternalServerErrorStatusCode, message: err };
-        }
-        res.status(response.status).json(response.message);
+    Race.create(newRace).then(race => {
+        response = { status: process.env.CreateSuccessStatusCode, message: race };
+    }).catch(err => {
+        response = { status: process.env.InternalServerErrorStatusCode, message: err };
+    }).finally(() => {
+        _sendResponse(res, response);
     });
+
+    // Race.create(newRace, (err, race) => {
+    //     let response = { status: process.env.CreateSuccessStatusCode, message: race };
+    //     if (err) {
+    //         response = { status: process.env.InternalServerErrorStatusCode, message: err };
+    //     }
+    //     res.status(response.status).json(response.message);
+    // });
 };
 
 const deleteOne = (req, res) => {
@@ -236,7 +244,6 @@ const _partialUpdateOneCallBack2 = (req, res, race) => {
 }
 
 const partialUpdate = (req, res) => {
-    // _findRaceByIdAndCallBack(req, res, _partialUpdateOneCallBack);
     let response = _createResponse(process.env.NoContentSuccessStatusCode, {});
     _findRaceByIdAndCallBack2(req).then(race => {
         _partialUpdateOneCallBack2(req, res, race);
