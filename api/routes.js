@@ -1,6 +1,7 @@
 const express = require("express");
 const raceController = require("./controllers/races.controller");
-const teamController = require("./controllers/teams.controller")
+const teamController = require("./controllers/teams.controller");
+const userController = require("./controllers/users.controller");
 const router = express.Router();
 
 router.route("/races")
@@ -19,6 +20,10 @@ router.route("/races/:raceId/teams/:teamId")
     .delete(teamController.deleteOne)
     .put(teamController.fullUpdate)
     .patch(teamController.partialUpdate);
+
+router.route("/users")
+    .post(userController.addOne);
+
 
 module.exports = router;
 

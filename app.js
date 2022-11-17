@@ -13,7 +13,8 @@ app.use((req, res, next) => {
 });
 
 let corsOptions = {
-    origin: 'http://localhost:4200'
+    origin: 'http://localhost:4200',
+    methods: "GET,PUT,PATCH,POST,DELETE"
 }
 app.use(cors(corsOptions));
 // app.use("/api", (req, res, next) => {

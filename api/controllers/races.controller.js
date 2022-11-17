@@ -6,6 +6,18 @@ const _sendResponse = (res, response) => {
 }
 
 
+const _findRaceByIdAndCallBack2 = (req, res) => {
+    return new Promise((resolve, reject) => {
+        const raceId = req.params.raceId;
+        if (mongoose.isValidObjectId(raceId)) {
+            Race.findById(raceId).exec().then((race) => { resolve(race); }).catch(err => { reject(err); });
+        } else {
+            _sendResponse(res, { status: process.env.BadRequestStatusCode, message: process.env.InvalidRaceIdMsg });
+            reject();
+        }
+    });
+}
+
 const _findRaceByIdAndCallBack = (req, res, callBack) => {
     const raceId = req.params.raceId;
     if (mongoose.isValidObjectId(raceId)) {
@@ -31,35 +43,60 @@ const getAll = (req, res) => {
             _sendResponse(res, { status: process.env.BadRequestStatusCode, message: process.env.RequestItemPerPageCountExceededMsg });
             return;
         }
-        Race.find().skip(offset).limit(count).exec((err, races) => {
-            const response = { status: process.env.OkStatusCode, message: races };
-            if (err) {
-                response.status = process.env.InternalServerErrorStatusCode;
-                response.message = process.env.ErrorWhileFetchingRaceMsg;
-            }
-            if (!races) {
-                response.status = process.env.ResourceNotFoundStatusCode;
-                response.message = process.env.RaceNotFoundMsg;
-            }
+        let response = { status: process.env.OkStatusCode, message: {} };
+        Race.find().skip(offset).limit(count).exec().then(races => {
+            // if (!races || races.length == 0) {
+            //     response.status = process.env.ResourceNotFoundStatusCode;
+            //     response.message = process.env.RaceNotFoundMsg;
+            // } else {
+            response = { status: process.env.OkStatusCode, message: races };
+            // }
+        }).catch(err => {
+            console.log(err);
+            response.status = process.env.InternalServerErrorStatusCode;
+            response.message = process.env.ErrorWhileFetchingRaceMsg;
+        }).finally(() => {
             _sendResponse(res, response);
         });
     }
 }
 
+// const getOne = (req, res) => {
+//     const _getOne = (req, res, err, race) => {
+//         let response = { status: process.env.OkStatusCode, message: race }
+//         if (err) {
+//             response.status = process.env.InternalServerErrorStatusCode;
+//             response.message = err;
+//         }
+//         if (!race) {
+//             response.status = process.env.ResourceNotFoundStatusCode;
+//             response.message = process.env.RaceWithIdDoesnotExist;
+//         }
+//         _sendResponse(res, response);
+//     }
+//     _findRaceByIdAndCallBack(req, res, _getOne);
+// }
 const getOne = (req, res) => {
-    const _getOne = (req, res, err, race) => {
-        let response = { status: process.env.OkStatusCode, message: race }
-        if (err) {
-            response.status = process.env.InternalServerErrorStatusCode;
-            response.message = err;
-        }
-        if (!race) {
-            response.status = process.env.ResourceNotFoundStatusCode;
-            response.message = process.env.RaceWithIdDoesnotExist;
-        }
+    // const _getOne = (req, res, err, race) => {
+    //     if (err) {
+    //         response.status = process.env.InternalServerErrorStatusCode;
+    //         response.message = err;
+    //     }
+    //     if (!race) {
+    //         response.status = process.env.ResourceNotFoundStatusCode;
+    //         response.message = process.env.RaceWithIdDoesnotExist;
+    //     }
+    //     _sendResponse(res, response);
+    // }
+    let response = { status: process.env.OkStatusCode, message: {} }
+    _findRaceByIdAndCallBack2(req, res).then(race => {
+        response.message = race;
+    }).catch(err => {
+        response.status = process.env.InternalServerErrorStatusCode;
+        response.message = err;
+    }).finally(() => {
         _sendResponse(res, response);
-    }
-    _findRaceByIdAndCallBack(req, res, _getOne);
+    });
 }
 
 const addOne = (req, res) => {

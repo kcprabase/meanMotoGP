@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 require("./races.model");
+require("./users.model");
 mongoose.connect(process.env.DbUrl, {
     useNewUrlParser: true,
     useUnifiedTopology: true
