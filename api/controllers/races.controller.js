@@ -19,7 +19,7 @@ const _sendResponse = (res, response) => {
     res.status(parseInt(response.status)).json(response.message);
 }
 
-const _readParamsForGetAll = (req, response) => {
+const _readQueryParamsForGetAll = (req, response) => {
     return new Promise((resolve, reject) => {
         let offset = parseInt(req.query.offset || process.env.DefaultGetOffset, 10);
         let count = parseInt(req.query.count || process.env.DefaultGetCount, 10);
@@ -57,7 +57,7 @@ const _prepareRacesResponse = (races, response) => {
 
 const getAll = function (req, res) {
     const response = { status: process.env.OkStatusCode, message: {} };
-    _readParamsForGetAll(req, response)
+    _readQueryParamsForGetAll(req, response)
         .then((params) => _queryAllRaces(params, response))
         .then((races) => _prepareRacesResponse(races, response))
         .catch(error => { _log(error); })
@@ -66,7 +66,6 @@ const getAll = function (req, res) {
 
 const _readQueryParamForRaceId = (req, response) => {
     return new Promise((resolve, reject) => {
-        //check raceId exist or not here? or its not required.
         const raceId = req.params.raceId;
         if (mongoose.isValidObjectId(raceId)) {
             resolve(raceId);
@@ -80,17 +79,18 @@ const _readQueryParamForRaceId = (req, response) => {
 
 const _queryRaceById = (raceId, response) => {
     return new Promise((resolve, reject) => {
-        Race.findById(raceId).exec().then((race) => {
-            if (!race) {
-                response.status = process.env.ResourceNotFoundStatusCode;
-                response.message = process.env.RaceIdNotFound
-                reject(process.env.RaceIdNotFound);
-            } else { resolve(race); }
-        }).catch(err => {
-            response.status = process.env.InternalServerErrorStatusCode;
-            response.message = process.env.ErrorWhileFetchingRaceMsg
-            reject(err);
-        });
+        Race.findById(raceId)
+            .then((race) => {
+                if (!race) {
+                    response.status = process.env.ResourceNotFoundStatusCode;
+                    response.message = process.env.RaceIdNotFound
+                    reject(process.env.RaceIdNotFound);
+                } else { resolve(race); }
+            }).catch(err => {
+                response.status = process.env.InternalServerErrorStatusCode;
+                response.message = process.env.ErrorWhileFetchingRaceMsg
+                reject(err);
+            });
     });
 }
 
@@ -270,16 +270,52 @@ const _fullUpdateOneCallBack2 = (req, res, race) => {
     _updateOneCallBack2(req, res, race);
 }
 
-const fullUpdate = (req, resp) => {
-    let response = _getDefaultResponse(process.env.NoContentSuccessStatusCode);
-    _findRaceByIdAndCallBack2(req).then(race => {
-        _fullUpdateOneCallBack2(req, resp, race);
-    }).catch(err => {
-        console.log("race not found", err)
-        response = err;
-        _sendResponse(resp, response);
+const _runRaceUpdateQuery = (race, response) => {
+    return new Promise((resolve, reject) => {
+        race.save()
+            .then(updatedGame => resolve(updatedGame))
+            .catch(err => {
+                response.status = process.env.InternalServerErrorStatusCode;
+                response.message = err;
+                reject(err);
+            });
     });
 }
+
+const _readBodyParamsForFullUpdate = (race, response) => {
+    return new Promise((resolve, reject) => {
+        if (req.body) {
+            race.circuitName = req.body.circuitName;
+            race.season = req.body.season;
+            race.winner = req.body.winner;
+            resolve(race);
+        } else {
+            response.status = process.env.BadRequestStatusCode;
+            response.message = process.env.RequestBodyNotFound;
+            reject();
+        }
+    });
+}
+
+const fullUpdate = (req, res) => {
+    let response = _getDefaultResponse(process.env.NoContentSuccessStatusCode);
+    _getRaceById(req, response)
+        .then(race => _readBodyParamsForFullUpdate(race, response))
+        .then(race => _runRaceUpdateQuery(race, response))
+        .catch(error => _log(error))
+        .finally(() => _sendResponse(res, response));
+}
+// const fullUpdate = (req, resp) => {
+//     let response = _getDefaultResponse(process.env.NoContentSuccessStatusCode);
+//     _findRaceByIdAndCallBack2(req).then(race => {
+//         _fullUpdateOneCallBack2(req, resp, race);
+//     }).catch(err => {
+//         console.log("race not found", err)
+//         response = err;
+//         _sendResponse(resp, response);
+//     });
+// }
+
 
 const _partialUpdateOneCallBack = (req, res, err, race) => {
     const _setPartialUpdateObject = (req, race) => {
