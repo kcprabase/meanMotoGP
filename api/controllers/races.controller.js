@@ -1,3 +1,4 @@
+const { response } = require("express");
 const mongoose = require("mongoose");
 const Race = mongoose.model(process.env.RaceModel);
 
@@ -32,7 +33,7 @@ const _readParamsForGetAll = (req, response) => {
     });
 }
 
-const _findAllRaces = (params, response) => {
+const _queryAllRaces = (params, response) => {
     return new Promise((resolve, reject) => {
         Race.find().skip(params.offset).limit(params.count).then((races) => {
             resolve(races);
@@ -57,12 +58,58 @@ const _prepareRacesResponse = (races, response) => {
 const getAll = function (req, res) {
     const response = { status: process.env.OkStatusCode, message: {} };
     _readParamsForGetAll(req, response)
-        .then((params) => _findAllRaces(params, response))
+        .then((params) => _queryAllRaces(params, response))
         .then((races) => _prepareRacesResponse(races, response))
         .catch(error => { _log(error); })
         .finally(() => { _sendResponse(res, response); });
 }
 
+const _readQueryParamForRaceId = (req, response) => {
+    return new Promise((resolve, reject) => {
+        //check raceId exist or not here? or its not required.
+        const raceId = req.params.raceId;
+        if (mongoose.isValidObjectId(raceId)) {
+            resolve(raceId);
+        } else {
+            response.status = process.env.BadRequestStatusCode;
+            response.message = process.env.InvalidRaceIdMsg
+            reject(process.env.InvalidRaceIdMsg);
+        }
+    });
+}
+
+const _queryRaceById = (raceId, response) => {
+    return new Promise((resolve, reject) => {
+        Race.findById(raceId).exec().then((race) => {
+            if (!race) {
+                response.status = process.env.ResourceNotFoundStatusCode;
+                response.message = process.env.RaceIdNotFound
+                reject(process.env.RaceIdNotFound);
+            } else { resolve(race); }
+        }).catch(err => {
+            response.status = process.env.InternalServerErrorStatusCode;
+            response.message = process.env.ErrorWhileFetchingRaceMsg
+            reject(err);
+        });
+    });
+}
+
+const _getRaceById = (req, response) => {
+    return new Promise((resolve, reject) => {
+        _readQueryParamForRaceId(req, response)
+            .then(raceId => _queryRaceById(raceId, response))
+            .then(race => resolve(race))
+            .catch((error) => reject(error));
+    });
+}
+
+const getOne = (req, res) => {
+    let response = { status: process.env.OkStatusCode, message: {} }
+    _getRaceById(req, response)
+        .then(race => { response.message = race; })
+        .catch(error => _log(error))
+        .finally(() => _sendResponse(res, response));
+}
 
 const _findRaceByIdAndCallBack2 = (req) => {
     return new Promise((resolve, reject) => {
@@ -80,16 +127,16 @@ const _findRaceByIdAndCallBack2 = (req) => {
     });
 }
 
-const _findRaceByIdAndCallBack = (req, res, callBack) => {
-    const raceId = req.params.raceId;
-    if (mongoose.isValidObjectId(raceId)) {
-        Race.findById(raceId).exec((err, race) => {
-            callBack(req, res, err, race);
-        });
-    } else {
-        _sendResponse(res, { status: process.env.BadRequestStatusCode, message: process.env.InvalidRaceIdMsg });
-    }
-}
+// const _findRaceByIdAndCallBack = (req, res, callBack) => {
+//     const raceId = req.params.raceId;
+//     if (mongoose.isValidObjectId(raceId)) {
+//         Race.findById(raceId).exec((err, race) => {
+//             callBack(req, res, err, race);
+//         });
+//     } else {
+//         _sendResponse(res, { status: process.env.BadRequestStatusCode, message: process.env.InvalidRaceIdMsg });
+//     }
+// }
 
 
 // const getOne = (req, res) => {
@@ -107,22 +154,6 @@ const _findRaceByIdAndCallBack = (req, res, callBack) => {
 //     }
 //     _findRaceByIdAndCallBack(req, res, _getOne);
 // }
-const getOne = (req, res) => {
-    let response = { status: process.env.OkStatusCode, message: {} }
-    _findRaceByIdAndCallBack2(req).then(race => {
-        response.message = race;
-    }).catch(err => {
-        console.log(err);
-        if (err.status) {
-            response = err;
-        } else {
-            response.status = process.env.InternalServerErrorStatusCode;
-            response.message = err;
-        }
-    }).finally(() => {
-        _sendResponse(res, response);
-    });
-}
 
 const addOne = (req, res) => {
     let response = { status: process.env.CreateSuccessStatusCode, message: {} };
