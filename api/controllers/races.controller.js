@@ -18,6 +18,57 @@ const _sendResponse = (res, response) => {
     res.status(parseInt(response.status)).json(response.message);
 }
 
+const getAll = function (req, res) {
+    const response = _getDefaultResponse(process.env.OkStatusCode);
+    _readQueryParamsForGetAll(req, response)
+        .then((params) => _queryAllRaces(params, response))
+        .then((races) => _prepareRacesResponse(races, response))
+        .catch(error => { _log(error); })
+        .finally(() => { _sendResponse(res, response); });
+}
+
+const getOne = (req, res) => {
+    const response = _getDefaultResponse(process.env.OkStatusCode);
+    _getRaceById(req, response)
+        .then(race => { response.message = race; })
+        .catch(error => _log(error))
+        .finally(() => _sendResponse(res, response));
+}
+
+const addOne = (req, res) => {
+    let response = _getDefaultResponse(process.env.CreateSuccessStatusCode);
+    _readBodyParamsForAddOne(req)
+        .then(newRace => _runRaceCreateQuery(newRace, response))
+        .catch(error => _log(error))
+        .finally(() => _sendResponse(res, response));
+};
+
+const fullUpdate = (req, res) => {
+    let response = _getDefaultResponse(process.env.NoContentSuccessStatusCode);
+    _getRaceById(req, response)
+        .then(race => _readBodyParamsForFullUpdate(req, race))
+        .then(race => _runRaceUpdateQuery(race, response))
+        .catch(error => _log(error))//need to handle error here.
+        .finally(() => _sendResponse(res, response));
+}
+
+const partialUpdate = (req, res) => {
+    let response = _getDefaultResponse(process.env.NoContentSuccessStatusCode);
+    _getRaceById(req, response)
+        .then(race => _readBodyParamsForPartialUpdate(req, race))
+        .then(race => _runRaceUpdateQuery(race, response))
+        .catch(error => _log(error))
+        .finally(() => _sendResponse(res, response));
+}
+
+const deleteOne = (req, res) => {
+    let response = _getDefaultResponse(process.env.NoContentSuccessStatusCode);
+    _getRaceById(req, response)
+        .then(race => _runRaceDeleteQuery(race, response))
+        .catch(error => _log(error))
+        .finally(() => _sendResponse(res, response));
+}
+
 const _readQueryParamsForGetAll = (req, response) => {
     return new Promise((resolve, reject) => {
         let offset = parseInt(req.query.offset || process.env.DefaultGetOffset, 10);
@@ -52,15 +103,6 @@ const _prepareRacesResponse = (races, response) => {
         response.status = process.env.OkStatusCode;
         response.message = races;
     }
-}
-
-const getAll = function (req, res) {
-    const response = { status: process.env.OkStatusCode, message: {} };
-    _readQueryParamsForGetAll(req, response)
-        .then((params) => _queryAllRaces(params, response))
-        .then((races) => _prepareRacesResponse(races, response))
-        .catch(error => { _log(error); })
-        .finally(() => { _sendResponse(res, response); });
 }
 
 const _readQueryParamForRaceId = (req, response) => {
@@ -102,14 +144,6 @@ const _getRaceById = (req, response) => {
     });
 }
 
-const getOne = (req, res) => {
-    let response = { status: process.env.OkStatusCode, message: {} }
-    _getRaceById(req, response)
-        .then(race => { response.message = race; })
-        .catch(error => _log(error))
-        .finally(() => _sendResponse(res, response));
-}
-
 const _readBodyParamsForAddOne = (req) => {
     return new Promise((resolve, reject) => {
         const newRace = {
@@ -136,57 +170,45 @@ const _runRaceCreateQuery = (newRace, response) => {
     });
 }
 
-const addOne = (req, res) => {
-    let response = _getDefaultResponse(process.env.CreateSuccessStatusCode);
-    _readBodyParamsForAddOne(req)
-        .then(newRace => _runRaceCreateQuery(newRace, response))
-        .catch(error => _log(error))
-        .finally(() => _sendResponse(res, response));
-};
-
-// const addOne = (req, res) => {
-//     let response = { status: process.env.CreateSuccessStatusCode, message: {} };
-//     const newRace = {
-//         circuitName: req.body.circuitName,
-//         season: req.body.season,
-//         winner: req.body.winner
-//     };
-//     Race.create(newRace).then(race => {
-//         response = { status: process.env.CreateSuccessStatusCode, message: race };
-//     }).catch(err => {
-//         response = { status: process.env.InternalServerErrorStatusCode, message: err };
-//     }).finally(() => {
-//         _sendResponse(res, response);
-//     });
-// };
-
-const deleteOne = (req, res) => {
-    const raceId = req.params.raceId;
-    let response = {
-        status: process.env.NoContentSuccessStatusCode,
-        message: {}
-    };
-    if (mongoose.isValidObjectId(raceId)) {
-        Race.findByIdAndDelete(raceId).exec().then((race) => {
-            if (!race) {
-                response = { status: process.env.ResourceNotFoundStatusCode, message: process.env.RaceIdNotFound };
-            } else {
-                response = {
-                    status: process.env.NoContentSuccessStatusCode,
-                    message: race
-                };
-            }
-        }).catch(err => {
-            response.status = process.env.InternalServerErrorStatusCode;
-            response.message = err;
-        }).finally(() => {
-            _sendResponse(res, response);
-        });
-    } else {
-        _sendResponse(res, { status: process.env.BadRequestStatusCode, message: process.env.InvalidRaceIdMsg });
-
-    }
+const _runRaceDeleteQuery = (race, response) => {
+    return new Promise((resolve, reject) => {
+        race.deleteOne()
+            .then(deletedRace => resolve(deletedRace))
+            .catch(error => {
+                response.status = process.env.InternalServerErrorStatusCode;
+                response.message = error;
+                reject(error);
+            });
+    });
 }
+
+// const deleteOne = (req, res) => {
+//     const raceId = req.params.raceId;
+//     let response = {
+//         status: process.env.NoContentSuccessStatusCode,
+//         message: {}
+//     };
+//     if (mongoose.isValidObjectId(raceId)) {
+//         Race.findByIdAndDelete(raceId).exec().then((race) => {
+//             if (!race) {
+//                 response = { status: process.env.ResourceNotFoundStatusCode, message: process.env.RaceIdNotFound };
+//             } else {
+//                 response = {
+//                     status: process.env.NoContentSuccessStatusCode,
+//                     message: race
+//                 };
+//             }
+//         }).catch(err => {
+//             response.status = process.env.InternalServerErrorStatusCode;
+//             response.message = err;
+//         }).finally(() => {
+//             _sendResponse(res, response);
+//         });
+//     } else {
+//         _sendResponse(res, { status: process.env.BadRequestStatusCode, message: process.env.InvalidRaceIdMsg });
+
+//     }
+// }
 
 
 const _runRaceUpdateQuery = (race, response) => {
@@ -210,15 +232,6 @@ const _readBodyParamsForFullUpdate = (req, race) => {
     });
 }
 
-const fullUpdate = (req, res) => {
-    let response = _getDefaultResponse(process.env.NoContentSuccessStatusCode);
-    _getRaceById(req, response)
-        .then(race => _readBodyParamsForFullUpdate(req, race))
-        .then(race => _runRaceUpdateQuery(race, response))
-        .catch(error => _log(error))//need to handle error here.
-        .finally(() => _sendResponse(res, response));
-}
-
 const _readBodyParamsForPartialUpdate = (req, race) => {
     return new Promise((resolve, reject) => {
         if (req.body.circuitName) race.circuitName = req.body.circuitName;
@@ -226,15 +239,6 @@ const _readBodyParamsForPartialUpdate = (req, race) => {
         if (req.body.winner) race.winner = req.body.winner;
         resolve(race);
     });
-}
-
-const partialUpdate = (req, res) => {
-    let response = _getDefaultResponse(process.env.NoContentSuccessStatusCode);
-    _getRaceById(req, response)
-        .then(race => _readBodyParamsForPartialUpdate(req, race))
-        .then(race => _runRaceUpdateQuery(race, response))
-        .catch(error => _log(error))
-        .finally(() => _sendResponse(res, response));
 }
 
 
