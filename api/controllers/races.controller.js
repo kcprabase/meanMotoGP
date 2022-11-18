@@ -1,12 +1,66 @@
 const mongoose = require("mongoose");
 const Race = mongoose.model(process.env.RaceModel);
 
+
+const _log = (...log) => {
+    console.log(log);
+}
+
+const _getDefaultResponse = (status, message) => {
+    let response = {
+        status: status || process.env.OkStatusCode,
+        message: message || {}
+    }
+    return response;
+}
+
 const _sendResponse = (res, response) => {
     res.status(parseInt(response.status)).json(response.message);
 }
 
-const _createResponse = (status, message) => {
-    return { status, message };
+const _readParamsForGetAll = (req, response) => {
+    return new Promise((resolve, reject) => {
+        let offset = parseInt(req.query.offset || process.env.DefaultGetOffset, 10);
+        let count = parseInt(req.query.count || process.env.DefaultGetCount, 10);
+        if (count > parseInt(process.env.RacePageCountLimit)) {
+            response.status = process.env.BadRequestStatusCode;
+            response.message = process.env.RequestItemPerPageCountExceededMsg;
+            reject(process.env.RequestItemPerPageCountExceededMsg);
+        } else {
+            resolve({ offset, count });
+        }
+    });
+}
+
+const _findAllRaces = (params, response) => {
+    return new Promise((resolve, reject) => {
+        Race.find().skip(params.offset).limit(params.count).then((races) => {
+            resolve(races);
+        }).catch((error) => {
+            response.status = process.env.InternalServerErrorStatusCode;
+            response.message = process.env.ErrorWhileFetchingRaceMsg;
+            reject(error);
+        });
+    });
+}
+
+const _prepareRacesResponse = (races, response) => {
+    if (!races || races.length == 0) {
+        response.status = process.env.ResourceNotFoundStatusCode;
+        response.message = process.env.RaceNotFoundMsg;
+    } else {
+        response.status = process.env.OkStatusCode;
+        response.message = races;
+    }
+}
+
+const getAll = function (req, res) {
+    const response = { status: process.env.OkStatusCode, message: {} };
+    _readParamsForGetAll(req, response)
+        .then((params) => _findAllRaces(params, response))
+        .then((races) => _prepareRacesResponse(races, response))
+        .catch(error => { _log(error); })
+        .finally(() => { _sendResponse(res, response); });
 }
 
 
@@ -37,37 +91,6 @@ const _findRaceByIdAndCallBack = (req, res, callBack) => {
     }
 }
 
-const getAll = (req, res) => {
-    let offset = 0;
-    let count = 5;
-    if (req.query) {
-        if (req.query.offset) {
-            offset = parseInt(req.query.offset, 10);
-        }
-        if (req.query.count) {
-            count = parseInt(req.query.count, 10);
-        }
-        if (count > parseInt(process.env.RacePageCountLimit)) {
-            _sendResponse(res, { status: process.env.BadRequestStatusCode, message: process.env.RequestItemPerPageCountExceededMsg });
-            return;
-        }
-        let response = { status: process.env.OkStatusCode, message: {} };
-        Race.find().skip(offset).limit(count).exec().then(races => {
-            if (!races || races.length == 0) {
-                response.status = process.env.ResourceNotFoundStatusCode;
-                response.message = process.env.RaceNotFoundMsg;
-            } else {
-                response = { status: process.env.OkStatusCode, message: races };
-            }
-        }).catch(err => {
-            console.log(err);
-            response.status = process.env.InternalServerErrorStatusCode;
-            response.message = process.env.ErrorWhileFetchingRaceMsg;
-        }).finally(() => {
-            _sendResponse(res, response);
-        });
-    }
-}
 
 // const getOne = (req, res) => {
 //     const _getOne = (req, res, err, race) => {
@@ -217,7 +240,7 @@ const _fullUpdateOneCallBack2 = (req, res, race) => {
 }
 
 const fullUpdate = (req, resp) => {
-    let response = _createResponse(process.env.NoContentSuccessStatusCode, {});
+    let response = _getDefaultResponse(process.env.NoContentSuccessStatusCode);
     _findRaceByIdAndCallBack2(req).then(race => {
         _fullUpdateOneCallBack2(req, resp, race);
     }).catch(err => {
