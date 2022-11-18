@@ -282,7 +282,7 @@ const _runRaceUpdateQuery = (race, response) => {
     });
 }
 
-const _readBodyParamsForFullUpdate = (race, response) => {
+const _readBodyParamsForFullUpdate = (req, race, response) => {
     return new Promise((resolve, reject) => {
         if (req.body) {
             race.circuitName = req.body.circuitName;
@@ -300,11 +300,36 @@ const _readBodyParamsForFullUpdate = (race, response) => {
 const fullUpdate = (req, res) => {
     let response = _getDefaultResponse(process.env.NoContentSuccessStatusCode);
     _getRaceById(req, response)
-        .then(race => _readBodyParamsForFullUpdate(race, response))
+        .then(race => _readBodyParamsForFullUpdate(req, race, response))
+        .then(race => _runRaceUpdateQuery(race, response))
+        .catch(error => _log(error))//need to handle error here.
+        .finally(() => _sendResponse(res, response));
+}
+
+const _readBodyParamsForPartialUpdate = (req, race, response) => {
+    return new Promise((resolve, reject) => {
+        if (req.body) {
+            if (req.body.circuitName) race.circuitName = req.body.circuitName;
+            if (req.body.season) race.season = req.body.season;
+            if (req.body.winner) race.winner = req.body.winner;
+            resolve(race);
+        } else {
+            response.status = process.env.BadRequestStatusCode;
+            response.message = process.env.RequestBodyNotFound;
+            reject();
+        }
+    });
+}
+
+const partialUpdate = (req, res) => {
+    let response = _getDefaultResponse(process.env.NoContentSuccessStatusCode);
+    _getRaceById(req, response)
+        .then(race => _readBodyParamsForPartialUpdate(req, race, response))
         .then(race => _runRaceUpdateQuery(race, response))
         .catch(error => _log(error))
         .finally(() => _sendResponse(res, response));
 }
+
 // const fullUpdate = (req, resp) => {
 //     let response = _getDefaultResponse(process.env.NoContentSuccessStatusCode);
 //     _findRaceByIdAndCallBack2(req).then(race => {
@@ -333,15 +358,15 @@ const _partialUpdateOneCallBack2 = (req, res, race) => {
     _updateOneCallBack2(req, res, race);
 }
 
-const partialUpdate = (req, res) => {
-    let response = _createResponse(process.env.NoContentSuccessStatusCode, {});
-    _findRaceByIdAndCallBack2(req).then(race => {
-        _partialUpdateOneCallBack2(req, res, race);
-    }).catch(err => {
-        console.log("race not found", err)
-        response = err;
-        _sendResponse(resp, response);
-    });
-}
+// const partialUpdate = (req, res) => {
+//     let response = _createResponse(process.env.NoContentSuccessStatusCode, {});
+//     _findRaceByIdAndCallBack2(req).then(race => {
+//         _partialUpdateOneCallBack2(req, res, race);
+//     }).catch(err => {
+//         console.log("race not found", err)
+//         response = err;
+//         _sendResponse(resp, response);
+//     });
+// }
 
 module.exports = { getAll, getOne, addOne, deleteOne, fullUpdate, partialUpdate };
