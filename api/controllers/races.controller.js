@@ -110,22 +110,55 @@ const getOne = (req, res) => {
         .finally(() => _sendResponse(res, response));
 }
 
+const _readBodyParamsForAddOne = (req) => {
+    return new Promise((resolve, reject) => {
+        const newRace = {
+            circuitName: req.body.circuitName,
+            season: req.body.season,
+            winner: req.body.winner
+        };
+        resolve(newRace);
+    });
+}
+
+const _runRaceCreateQuery = (newRace, response) => {
+    return new Promise((resolve, reject) => {
+        Race.create(newRace)
+            .then(race => {
+                response.status = process.env.CreateSuccessStatusCode;
+                response.message = race;
+                resolve(newRace);
+            }).catch(err => {
+                response.status = process.env.InternalServerErrorStatusCode;
+                response.message = err;
+                reject(err);
+            });
+    });
+}
 
 const addOne = (req, res) => {
-    let response = { status: process.env.CreateSuccessStatusCode, message: {} };
-    const newRace = {
-        circuitName: req.body.circuitName,
-        season: req.body.season,
-        winner: req.body.winner
-    };
-    Race.create(newRace).then(race => {
-        response = { status: process.env.CreateSuccessStatusCode, message: race };
-    }).catch(err => {
-        response = { status: process.env.InternalServerErrorStatusCode, message: err };
-    }).finally(() => {
-        _sendResponse(res, response);
-    });
+    let response = _getDefaultResponse(process.env.CreateSuccessStatusCode);
+    _readBodyParamsForAddOne(req)
+        .then(newRace => _runRaceCreateQuery(newRace, response))
+        .catch(error => _log(error))
+        .finally(() => _sendResponse(res, response));
 };
+
+// const addOne = (req, res) => {
+//     let response = { status: process.env.CreateSuccessStatusCode, message: {} };
+//     const newRace = {
+//         circuitName: req.body.circuitName,
+//         season: req.body.season,
+//         winner: req.body.winner
+//     };
+//     Race.create(newRace).then(race => {
+//         response = { status: process.env.CreateSuccessStatusCode, message: race };
+//     }).catch(err => {
+//         response = { status: process.env.InternalServerErrorStatusCode, message: err };
+//     }).finally(() => {
+//         _sendResponse(res, response);
+//     });
+// };
 
 const deleteOne = (req, res) => {
     const raceId = req.params.raceId;
@@ -168,49 +201,37 @@ const _runRaceUpdateQuery = (race, response) => {
     });
 }
 
-const _readBodyParamsForFullUpdate = (req, race, response) => {
+const _readBodyParamsForFullUpdate = (req, race) => {
     return new Promise((resolve, reject) => {
-        if (req.body) {
-            race.circuitName = req.body.circuitName;
-            race.season = req.body.season;
-            race.winner = req.body.winner;
-            resolve(race);
-        } else {
-            response.status = process.env.BadRequestStatusCode;
-            response.message = process.env.RequestBodyNotFound;
-            reject();
-        }
+        race.circuitName = req.body.circuitName;
+        race.season = req.body.season;
+        race.winner = req.body.winner;
+        resolve(race);
     });
 }
 
 const fullUpdate = (req, res) => {
     let response = _getDefaultResponse(process.env.NoContentSuccessStatusCode);
     _getRaceById(req, response)
-        .then(race => _readBodyParamsForFullUpdate(req, race, response))
+        .then(race => _readBodyParamsForFullUpdate(req, race))
         .then(race => _runRaceUpdateQuery(race, response))
         .catch(error => _log(error))//need to handle error here.
         .finally(() => _sendResponse(res, response));
 }
 
-const _readBodyParamsForPartialUpdate = (req, race, response) => {
+const _readBodyParamsForPartialUpdate = (req, race) => {
     return new Promise((resolve, reject) => {
-        if (req.body) {
-            if (req.body.circuitName) race.circuitName = req.body.circuitName;
-            if (req.body.season) race.season = req.body.season;
-            if (req.body.winner) race.winner = req.body.winner;
-            resolve(race);
-        } else {
-            response.status = process.env.BadRequestStatusCode;
-            response.message = process.env.RequestBodyNotFound;
-            reject();
-        }
+        if (req.body.circuitName) race.circuitName = req.body.circuitName;
+        if (req.body.season) race.season = req.body.season;
+        if (req.body.winner) race.winner = req.body.winner;
+        resolve(race);
     });
 }
 
 const partialUpdate = (req, res) => {
     let response = _getDefaultResponse(process.env.NoContentSuccessStatusCode);
     _getRaceById(req, response)
-        .then(race => _readBodyParamsForPartialUpdate(req, race, response))
+        .then(race => _readBodyParamsForPartialUpdate(req, race))
         .then(race => _runRaceUpdateQuery(race, response))
         .catch(error => _log(error))
         .finally(() => _sendResponse(res, response));
