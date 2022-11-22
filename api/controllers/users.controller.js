@@ -34,7 +34,6 @@ const register = (req, res) => {
 
 const login = (req, res) => {
     let response = { status: process.env.OkStatusCode };
-    utility.appLog("body is ", req.body);
     (new Promise((resolve, reject) => {
         User.findOne({ username: req.body.username })
             .then(user => {
