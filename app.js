@@ -1,4 +1,5 @@
 const express = require("express");
+const utility = require("./api/utility");
 var cors = require('cors');
 require("dotenv").config();
 require("./api/data/db");
@@ -8,7 +9,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json())
 
 app.use((req, res, next) => {
-    console.log("REC_", req.method, req.url);
+    utility.appLog("REC_", req.method, req.url);
     next();
 });
 
@@ -16,6 +17,7 @@ let corsOptions = {
     origin: 'http://localhost:4200',
     methods: "GET,PUT,PATCH,POST,DELETE"
 }
+
 app.use(cors(corsOptions));
 // app.use("/api", (req, res, next) => {
 //     console.log("i'm here", req.method);

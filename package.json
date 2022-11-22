@@ -4,7 +4,9 @@
   "description": "Moto gp crud web application using express and mongo db",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "npm run start-backend | npm run start-frontend",
+    "start-backend": "node app.js",
+    "start-frontend": "cd public/mean-motogp-app && npm start",
     "dev": "nodemon --inspect",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

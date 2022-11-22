@@ -1,72 +1,68 @@
 const mongoose = require("mongoose");
+const utility = require("../utility");
 const Race = mongoose.model(process.env.RaceModel);
 
+// const utility.getDefaultResponse = (status, message) => {
+//     let response = {
+//         status: status || process.env.OkStatusCode,
+//         message: message || {}
+//     }
+//     return response;
+// }
 
-const _log = (...log) => {
-    console.log(log);
-}
-
-const _getDefaultResponse = (status, message) => {
-    let response = {
-        status: status || process.env.OkStatusCode,
-        message: message || {}
-    }
-    return response;
-}
-
-const _sendResponse = (res, response) => {
-    res.status(parseInt(response.status)).json(response.message);
-}
+// const utility.sendResponse = (res, response) => {
+//     res.status(parseInt(response.status)).json(response.message);
+// }
 
 const getAll = function (req, res) {
-    const response = _getDefaultResponse(process.env.OkStatusCode);
+    const response = utility.getDefaultResponse(process.env.OkStatusCode);
     _readQueryParamsForGetAll(req, response)
         .then((params) => _queryAllRaces(params, response))
         .then((races) => _prepareRacesResponse(races, response))
-        .catch(error => { _log(error); })
-        .finally(() => { _sendResponse(res, response); });
+        .catch(error => { utility.appLog(error); })
+        .finally(() => { utility.sendResponse(res, response); });
 }
 
 const getOne = (req, res) => {
-    const response = _getDefaultResponse(process.env.OkStatusCode);
+    const response = utility.getDefaultResponse(process.env.OkStatusCode);
     _getRaceById(req, response)
         .then(race => { response.message = race; })
-        .catch(error => _log(error))
-        .finally(() => _sendResponse(res, response));
+        .catch(error => utility.appLog(error))
+        .finally(() => utility.sendResponse(res, response));
 }
 
 const addOne = (req, res) => {
-    let response = _getDefaultResponse(process.env.CreateSuccessStatusCode);
+    let response = utility.getDefaultResponse(process.env.CreateSuccessStatusCode);
     _readBodyParamsForAddOne(req)
         .then(newRace => _runRaceCreateQuery(newRace, response))
-        .catch(error => _log(error))
-        .finally(() => _sendResponse(res, response));
+        .catch(error => utility.appLog(error))
+        .finally(() => utility.sendResponse(res, response));
 };
 
 const fullUpdate = (req, res) => {
-    let response = _getDefaultResponse(process.env.NoContentSuccessStatusCode);
+    let response = utility.getDefaultResponse(process.env.NoContentSuccessStatusCode);
     _getRaceById(req, response)
         .then(race => _readBodyParamsForFullUpdate(req, race))
         .then(race => _runRaceUpdateQuery(race, response))
-        .catch(error => _log(error))//need to handle error here.
-        .finally(() => _sendResponse(res, response));
+        .catch(error => utility.appLog(error))//need to handle error here.
+        .finally(() => utility.sendResponse(res, response));
 }
 
 const partialUpdate = (req, res) => {
-    let response = _getDefaultResponse(process.env.NoContentSuccessStatusCode);
+    let response = utility.getDefaultResponse(process.env.NoContentSuccessStatusCode);
     _getRaceById(req, response)
         .then(race => _readBodyParamsForPartialUpdate(req, race))
         .then(race => _runRaceUpdateQuery(race, response))
-        .catch(error => _log(error))
-        .finally(() => _sendResponse(res, response));
+        .catch(error => utility.appLog(error))
+        .finally(() => utility.sendResponse(res, response));
 }
 
 const deleteOne = (req, res) => {
-    let response = _getDefaultResponse(process.env.NoContentSuccessStatusCode);
+    let response = utility.getDefaultResponse(process.env.NoContentSuccessStatusCode);
     _getRaceById(req, response)
         .then(race => _runRaceDeleteQuery(race, response))
-        .catch(error => _log(error))
-        .finally(() => _sendResponse(res, response));
+        .catch(error => utility.appLog(error))
+        .finally(() => utility.sendResponse(res, response));
 }
 
 const _readQueryParamsForGetAll = (req, response) => {
@@ -181,35 +177,6 @@ const _runRaceDeleteQuery = (race, response) => {
             });
     });
 }
-
-// const deleteOne = (req, res) => {
-//     const raceId = req.params.raceId;
-//     let response = {
-//         status: process.env.NoContentSuccessStatusCode,
-//         message: {}
-//     };
-//     if (mongoose.isValidObjectId(raceId)) {
-//         Race.findByIdAndDelete(raceId).exec().then((race) => {
-//             if (!race) {
-//                 response = { status: process.env.ResourceNotFoundStatusCode, message: process.env.RaceIdNotFound };
-//             } else {
-//                 response = {
-//                     status: process.env.NoContentSuccessStatusCode,
-//                     message: race
-//                 };
-//             }
-//         }).catch(err => {
-//             response.status = process.env.InternalServerErrorStatusCode;
-//             response.message = err;
-//         }).finally(() => {
-//             _sendResponse(res, response);
-//         });
-//     } else {
-//         _sendResponse(res, { status: process.env.BadRequestStatusCode, message: process.env.InvalidRaceIdMsg });
-
-//     }
-// }
-
 
 const _runRaceUpdateQuery = (race, response) => {
     return new Promise((resolve, reject) => {

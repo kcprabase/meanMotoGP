@@ -21,8 +21,8 @@ router.route("/races/:raceId/teams/:teamId")
     .put(teamController.fullUpdate)
     .patch(teamController.partialUpdate);
 
-router.route("/users")
-    .post(userController.addOne);
+router.route("/users/register")
+    .post(userController.register);
 
 
 module.exports = router;
