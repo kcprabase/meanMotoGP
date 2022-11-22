@@ -1,4 +1,8 @@
-<button routerLink="/">Home</button>
-<button routerLink="/races">Races</button>
-<button routerLink="/register">Register</button>
-<button routerLink="/login">Login</button>
+<nav>
+    <button routerLink="/">Home</button>
+    <button routerLink="/races">Races</button>
+    <button *ngIf="!isLoggedIn" routerLink="/register">Register</button>
+    <button *ngIf="isLoggedIn" routerLink="/profile">Profile</button>
+    <button *ngIf="!isLoggedIn" class="login-btn" routerLink="/login">Login</button>
+    <button *ngIf="isLoggedIn" class="login-btn" (click)="logout()">Logout</button>
+</nav>

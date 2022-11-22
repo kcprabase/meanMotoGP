@@ -39,7 +39,9 @@ const login = (req, res) => {
         User.findOne({ username: req.body.username })
             .then(user => {
                 if (!user) {
-                    response.message = "user not found. go away";
+                    utility.appLog("user not found. go away");
+                    response.status = process.env.UnauthorizedStatusCode;
+                    response.message = "Unauthorized"
                     reject();
                 } else {
                     resolve(user);
@@ -58,11 +60,15 @@ const login = (req, res) => {
                         const token = _getToken(user);
                         response.message = { token: token }
                     } else {
-                        response.message = "No match. go away"
+                        //password dont match
+                        response.status = process.env.UnauthorizedStatusCode;
+                        response.message = "Unauthorized"
                     }
                     resolve();
                 }).catch(error => {
-                    response.message = "there was an error";
+                    //error while compaing password
+                    response.status = process.env.InternalServerErrorStatusCode;
+                    response.message = "Error occured"
                     reject(error);
                 });
             })

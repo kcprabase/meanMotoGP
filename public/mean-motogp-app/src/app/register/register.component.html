@@ -1,3 +1,10 @@
+<div class="success" *ngIf="errorMessage">
+    {{errorMessage}}
+</div>
+<div class="danger" *ngIf="successMessage">
+    {{successMessage}}
+</div>
+
 <form (ngSubmit)="onSubmit()" [formGroup]="registerForm">
     <label>Name: <input formControlName="name" /></label><br />
     <label>Username: <input formControlName="username" /></label><br />

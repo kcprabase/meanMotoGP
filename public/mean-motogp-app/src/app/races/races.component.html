@@ -1,5 +1,7 @@
-<br /><br />
-<button routerLink="/races/add">Add Race</button>
+<br />
+<h1>List of Races</h1>
+<br />
+<button *ngIf="isLoggedIn" routerLink="/races/add">Add Race</button>
 
 <ul>
     <li *ngFor="let race of races">
@@ -14,3 +16,6 @@
         </button>
     </li>
 </ul>
+
+<button [disabled]="offset<count" (click)="prev()">Previous</button>
+<button [disabled]="!races || races.length==0 || nextDisabled" (click)="next()">Next</button>

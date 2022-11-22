@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Race } from '../models/race.model';
-import { RacesDataService } from '../races-data.service';
+import { RacesDataService } from '../services/races-data.service';
 
 @Component({
   selector: 'app-race',

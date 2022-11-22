@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { User } from './models/user.model';
+import { User } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +16,8 @@ export class UsersDataService {
   }
 
   public login(user: User): Observable<Object> {
+    console.log("here", user);
+
     return this._httpClient.post(`${this._baseUrl}/login`, user);
   }
 }

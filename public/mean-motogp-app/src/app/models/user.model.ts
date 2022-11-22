@@ -18,4 +18,10 @@ export class User {
         this.#password = password;
         this.#name = name;
     }
+
+    reset(): void {
+        this.name = "";
+        this.username = "";
+        this.password = "";
+    }
 }
