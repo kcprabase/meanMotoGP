@@ -6,30 +6,90 @@ var jwt = require('jsonwebtoken');
 const User = mongoose.model(process.env.UserModel);
 
 
-const register = (req, res) => {
-    let response = { status: process.env.OkStatusCode };
-    bcrypt.hash(req.body.password, 10, (err, passwordHash) => {
-        if (err) {
-            response.status = process.env.InternalServerErrorStatusCode;
-            response.message = err;
-            utility.sendResponse(res, response);
+const _readBodyParams = (req, response, newUser) => {
+    return new Promise((resolve, reject) => {
+        if (!req.body || !req.body.name || !req.body.username || !req.body.password) {
+            response.message = "Not all user data available.";
+            response.status = process.env.BadRequestStatusCode;
+            reject();
         } else {
-            const newUser = {
-                name: req.body.name,
-                username: req.body.username,
-                password: passwordHash
-            };
-            User.create(newUser, (err, user) => {
-                if (err) {
-                    response = { status: process.env.InternalServerErrorStatusCode, message: err };
-                } else {
-                    const token = _getToken(user);
-                    response.message = { token: token };
-                }
-                utility.sendResponse(res, response);
-            });
+            newUser.username = req.body.username;
+            newUser.name = req.body.name;
+            newUser.password = req.body.password;
+            resolve(newUser);
         }
     });
+}
+
+const _runPasswordHash = (newUser, response) => {
+    return new Promise((resolve, reject) => {
+        bcrypt.hash(newUser.password, 10)
+            .then((hash) => {
+                newUser.password = hash;
+                resolve(newUser)
+            })
+            .catch((error) => {
+                response.status = process.env.InternalServerErrorStatusCode;
+                response.message = error;
+                reject();
+            })
+    });
+}
+
+const _runAddUserQuery = (newUser, response) => {
+    return new Promise((resolve, reject) => {
+        User.create(newUser).then(user => {
+            if (!user) {
+                response.status = process.env.InternalServerErrorStatusCode;
+                response.message = process.env.CouldNotAddUserMsg;
+                reject(process.env.CouldNotAddUserMsg);
+            } else {
+                resolve(user);
+            }
+        }).catch(error => {
+            response.status = process.env.InternalServerErrorStatusCode;
+            response.message = error;
+            reject(error);
+        });
+    });
+}
+
+const _createTokenResponse = (user, response) => {
+    const token = _getToken(user);
+    response.message = { token: token };
+}
+
+const register = (req, res) => {
+    let response = { status: process.env.OkStatusCode };
+    let newUser = {};
+    _readBodyParams(req, response, newUser)
+        .then(newUser => _runPasswordHash(newUser, response))
+        .then(newUser => _runAddUserQuery(newUser, response))
+        .then(user => _createTokenResponse(user, response))
+        .catch((error) => utility.appLog(error))
+        .finally(() => utility.sendResponse(res, response));
+    // bcrypt.hash(req.body.password, 10, (err, passwordHash) => {
+    //     if (err) {
+    //         response.status = process.env.InternalServerErrorStatusCode;
+    //         response.message = err;
+    //         utility.sendResponse(res, response);
+    //     } else {
+    //         const newUser = {
+    //             name: req.body.name,
+    //             username: req.body.username,
+    //             password: passwordHash
+    //         };
+    //         User.create(newUser, (err, user) => {
+    //             if (err) {
+    //                 response = { status: process.env.InternalServerErrorStatusCode, message: err };
+    //             } else {
+    //                 const token = _getToken(user);
+    //                 response.message = { token: token };
+    //             }
+    //             utility.sendResponse(res, response);
+    //         });
+    //     }
+    // });
 };
 
 const login = (req, res) => {

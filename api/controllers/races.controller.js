@@ -151,15 +151,15 @@ const _readBodyParamsForAddOne = (req) => {
 }
 
 const _prepareAddOneRaceResponse = (race, response) => {
-        if (!race) {
-            response.status = process.env.InternalServerErrorStatusCode;
-            response.message = process.env.CouldNotAddRaceMsg
-            reject(process.env.CouldNotAddRaceMsg);
-        } else {
-            response.status = process.env.CreateSuccessStatusCode;
-            response.message = race;
-            resolve(race);
-        }
+    if (!race) {
+        response.status = process.env.InternalServerErrorStatusCode;
+        response.message = process.env.CouldNotAddRaceMsg
+        reject(process.env.CouldNotAddRaceMsg);
+    } else {
+        response.status = process.env.CreateSuccessStatusCode;
+        response.message = race;
+        resolve(race);
+    }
 }
 
 const _runRaceCreateQuery = (newRace, response) => {
