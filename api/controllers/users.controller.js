@@ -6,10 +6,22 @@ var jwt = require('jsonwebtoken');
 const User = mongoose.model(process.env.UserModel);
 
 
-const _readBodyParams = (req, response, newUser) => {
+
+const register = (req, res) => {
+    let response = { status: process.env.OkStatusCode };
+    let newUser = {};
+    _readBodyParamsForRegister(req, response, newUser)
+        .then(newUser => _runPasswordHash(newUser, response))
+        .then(newUser => _runAddUserQuery(newUser, response))
+        .then(user => _createTokenResponse(user, response))
+        .catch((error) => utility.appLog(error))
+        .finally(() => utility.sendResponse(res, response));
+};
+
+const _readBodyParamsForRegister = (req, response, newUser) => {
     return new Promise((resolve, reject) => {
         if (!req.body || !req.body.name || !req.body.username || !req.body.password) {
-            response.message = "Not all user data available.";
+            response.message = process.env.NotAllDataAvailableForRegister;
             response.status = process.env.BadRequestStatusCode;
             reject();
         } else {
@@ -59,81 +71,106 @@ const _createTokenResponse = (user, response) => {
     response.message = { token: token };
 }
 
-const register = (req, res) => {
-    let response = { status: process.env.OkStatusCode };
-    let newUser = {};
-    _readBodyParams(req, response, newUser)
-        .then(newUser => _runPasswordHash(newUser, response))
-        .then(newUser => _runAddUserQuery(newUser, response))
-        .then(user => _createTokenResponse(user, response))
-        .catch((error) => utility.appLog(error))
-        .finally(() => utility.sendResponse(res, response));
-    // bcrypt.hash(req.body.password, 10, (err, passwordHash) => {
-    //     if (err) {
-    //         response.status = process.env.InternalServerErrorStatusCode;
-    //         response.message = err;
-    //         utility.sendResponse(res, response);
-    //     } else {
-    //         const newUser = {
-    //             name: req.body.name,
-    //             username: req.body.username,
-    //             password: passwordHash
-    //         };
-    //         User.create(newUser, (err, user) => {
-    //             if (err) {
-    //                 response = { status: process.env.InternalServerErrorStatusCode, message: err };
-    //             } else {
-    //                 const token = _getToken(user);
-    //                 response.message = { token: token };
-    //             }
-    //             utility.sendResponse(res, response);
-    //         });
-    //     }
-    // });
-};
+const _checkBodyParamsForLogin = (req, response) => {
+    return new Promise((resolve, reject) => {
+        if (req.body.username && req.body.password) {
+            resolve();
+        } else {
+            response.status = process.env.BadRequestStatusCode;
+            response.message = process.env.Unauthorized;
+            reject(process.env.Unauthorized);
+        }
+    });
+}
 
-const login = (req, res) => {
-    let response = { status: process.env.OkStatusCode };
-    (new Promise((resolve, reject) => {
-        User.findOne({ username: req.body.username })
+const _findOneUserByUsername = (username) => {
+    return new Promise((resolve, reject) => {
+        User.findOne({ username: username })
             .then(user => {
                 if (!user) {
-                    utility.appLog("user not found. go away");
                     response.status = process.env.UnauthorizedStatusCode;
-                    response.message = "Unauthorized"
-                    reject();
+                    response.message = process.env.Unauthorized;
+                    reject(process.env.Unauthorized);
                 } else {
                     resolve(user);
                 }
             }).catch(error => {
-                utility.appLog("error is ", error);
                 response.status = process.env.InternalServerErrorStatusCode;
                 response.message = error;
                 reject(error);
-            })
-    }))
-        .then(user => {
-            return new Promise((resolve, reject) => {
-                bcrypt.compare(req.body.password, user.password).then((match) => {
-                    if (match) {
-                        const token = _getToken(user);
-                        response.message = { token: token }
-                    } else {
-                        //password dont match
-                        response.status = process.env.UnauthorizedStatusCode;
-                        response.message = "Unauthorized"
-                    }
-                    resolve();
-                }).catch(error => {
-                    //error while compaing password
-                    response.status = process.env.InternalServerErrorStatusCode;
-                    response.message = "Error occured"
-                    reject(error);
-                });
-            })
-        })
+            });
+    });
+}
+
+const _comparePassword = (req, user, response) => {
+    return new Promise((resolve, reject) => {
+        bcrypt.compare(req.body.password, user.password)
+            .then((match) => {
+                if (match) {
+                    resolve(user);
+                } else {
+                    response.status = process.env.UnauthorizedStatusCode;
+                    response.message = process.env.Unauthorized;
+                    reject(process.env.Unauthorized);
+                }
+            }).catch(error => {
+                utility.appLog(error);
+                response.status = process.env.InternalServerErrorStatusCode;
+                response.message = process.env.Unauthorized;
+                reject(process.env.Unauthorized);
+            });
+    });
+}
+
+const login = (req, res) => {
+    let response = { status: process.env.OkStatusCode };
+    _checkBodyParamsForLogin(req, response)
+        .then(() => _findOneUserByUsername(req.body.username))
+        .then(user => _comparePassword(req, user, response))
+        .then(user => _createTokenResponse(user, response))
         .catch(error => utility.appLog(error))
         .finally(() => utility.sendResponse(res, response));
+
+    // (new Promise((resolve, reject) => {
+    //     User.findOne({ username: req.body.username })
+    //         .then(user => {
+    //             if (!user) {
+    //                 utility.appLog("user not found. go away");
+    //                 response.status = process.env.UnauthorizedStatusCode;
+    //                 response.message = "Unauthorized"
+    //                 reject();
+    //             } else {
+    //                 resolve(user);
+    //             }
+    //         }).catch(error => {
+    //             utility.appLog("error is ", error);
+    //             response.status = process.env.InternalServerErrorStatusCode;
+    //             response.message = error;
+    //             reject(error);
+    //         })
+    // }))
+    //     .then(user => {
+    //         return new Promise((resolve, reject) => {
+    //             bcrypt.compare(req.body.password, user.password).then((match) => {
+    //                 if (match) {
+    //                     const token = _getToken(user);
+    //                     response.message = { token: token }
+    //                 } else {
+    //                     //password dont match
+    //                     response.status = process.env.UnauthorizedStatusCode;
+    //                     response.message = "Unauthorized"
+    //                 }
+    //                 resolve();
+    //             }).catch(error => {
+    //                 //error while compaing password
+    //                 response.status = process.env.InternalServerErrorStatusCode;
+    //                 response.message = "Error occured"
+    //                 reject(error);
+    //             });
+    //         })
+    //     })
+    //     .catch(error => utility.appLog(error))
+    //     .finally(() => utility.sendResponse(res, response));
 }
 
 const _getToken = (user) => {
