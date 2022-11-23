@@ -2,18 +2,6 @@ const mongoose = require("mongoose");
 const utility = require("../utility");
 const Race = mongoose.model(process.env.RaceModel);
 
-// const utility.getDefaultResponse = (status, message) => {
-//     let response = {
-//         status: status || process.env.OkStatusCode,
-//         message: message || {}
-//     }
-//     return response;
-// }
-
-// const utility.sendResponse = (res, response) => {
-//     res.status(parseInt(response.status)).json(response.message);
-// }
-
 const getAll = function (req, res) {
     const response = utility.getDefaultResponse(process.env.OkStatusCode);
     _readQueryParamsForGetAll(req, response)
@@ -35,6 +23,7 @@ const addOne = (req, res) => {
     let response = utility.getDefaultResponse(process.env.CreateSuccessStatusCode);
     _readBodyParamsForAddOne(req)
         .then(newRace => _runRaceCreateQuery(newRace, response))
+        .then(newRace => _prepareAddOneRaceResponse(newRace, response))
         .catch(error => utility.appLog(error))
         .finally(() => utility.sendResponse(res, response));
 };
@@ -65,6 +54,16 @@ const deleteOne = (req, res) => {
         .finally(() => utility.sendResponse(res, response));
 }
 
+const _getRaceById = (req, response) => {
+    return new Promise((resolve, reject) => {
+        _readQueryParamForRaceId(req, response)
+            .then(raceId => _queryRaceById(raceId, response))
+            .then(race => _prepareGetOneRaceErrorResponseOrResolve(race, response))
+            .then(race => resolve(race))
+            .catch((error) => reject(error));
+    });
+}
+
 const _readQueryParamsForGetAll = (req, response) => {
     return new Promise((resolve, reject) => {
         let offset = parseInt(req.query.offset || process.env.DefaultGetOffset, 10);
@@ -81,13 +80,16 @@ const _readQueryParamsForGetAll = (req, response) => {
 
 const _queryAllRaces = (params, response) => {
     return new Promise((resolve, reject) => {
-        Race.find().skip(params.offset).limit(params.count).then((races) => {
-            resolve(races);
-        }).catch((error) => {
-            response.status = process.env.InternalServerErrorStatusCode;
-            response.message = process.env.ErrorWhileFetchingRaceMsg;
-            reject(error);
-        });
+        Race.find()
+            .skip(params.offset)
+            .limit(params.count)
+            .then((races) => {
+                resolve(races);
+            }).catch((error) => {
+                response.status = process.env.InternalServerErrorStatusCode;
+                response.message = process.env.ErrorWhileFetchingRaceMsg;
+                reject(error);
+            });
     });
 }
 
@@ -114,29 +116,26 @@ const _readQueryParamForRaceId = (req, response) => {
     });
 }
 
+const _prepareGetOneRaceErrorResponseOrResolve = (race, response) => {
+    return new Promise((resolve, reject) => {
+        if (!race) {
+            response.status = process.env.ResourceNotFoundStatusCode;
+            response.message = process.env.RaceIdNotFound
+            reject(process.env.RaceIdNotFound);
+        } else { resolve(race); }
+    });
+}
+
 const _queryRaceById = (raceId, response) => {
     return new Promise((resolve, reject) => {
         Race.findById(raceId)
             .then((race) => {
-                if (!race) {
-                    response.status = process.env.ResourceNotFoundStatusCode;
-                    response.message = process.env.RaceIdNotFound
-                    reject(process.env.RaceIdNotFound);
-                } else { resolve(race); }
+                resolve(race);
             }).catch(err => {
                 response.status = process.env.InternalServerErrorStatusCode;
                 response.message = process.env.ErrorWhileFetchingRaceMsg
                 reject(err);
             });
-    });
-}
-
-const _getRaceById = (req, response) => {
-    return new Promise((resolve, reject) => {
-        _readQueryParamForRaceId(req, response)
-            .then(raceId => _queryRaceById(raceId, response))
-            .then(race => resolve(race))
-            .catch((error) => reject(error));
     });
 }
 
@@ -151,13 +150,23 @@ const _readBodyParamsForAddOne = (req) => {
     });
 }
 
+const _prepareAddOneRaceResponse = (race, response) => {
+        if (!race) {
+            response.status = process.env.InternalServerErrorStatusCode;
+            response.message = process.env.CouldNotAddRaceMsg
+            reject(process.env.CouldNotAddRaceMsg);
+        } else {
+            response.status = process.env.CreateSuccessStatusCode;
+            response.message = race;
+            resolve(race);
+        }
+}
+
 const _runRaceCreateQuery = (newRace, response) => {
     return new Promise((resolve, reject) => {
         Race.create(newRace)
             .then(race => {
-                response.status = process.env.CreateSuccessStatusCode;
-                response.message = race;
-                resolve(newRace);
+                resolve(race);
             }).catch(err => {
                 response.status = process.env.InternalServerErrorStatusCode;
                 response.message = err;
