@@ -1,5 +1,5 @@
 <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
     <label>{{"username" | env}}: <input name="username" [(ngModel)]="user.username" /></label><br />
-    <label>{{"password"|env}}: <input name="password" [(ngModel)]="user.password" /></label><br />
+    <label>{{"password"|env}}: <input name="password" type="password" [(ngModel)]="user.password" /></label><br />
     <button type="submit">{{"login"|env}}</button>
 </form>

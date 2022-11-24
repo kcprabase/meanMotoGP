@@ -73,23 +73,12 @@ const _readQueryParamsForGetAll = (req, response) => {
             response.message = process.env.RequestItemPerPageCountExceededMsg;
             reject(process.env.RequestItemPerPageCountExceededMsg);
         } else {
-            resolve({ offset, count });
+            let paramObj = { offset, count };
+            if (req.query.searchText) {
+                paramObj.searchText = req.query.searchText;
+            }
+            resolve(paramObj);
         }
-    });
-}
-
-const _queryAllRaces = (params, response) => {
-    return new Promise((resolve, reject) => {
-        Race.find()
-            .skip(params.offset)
-            .limit(params.count)
-            .then((races) => {
-                resolve(races);
-            }).catch((error) => {
-                response.status = process.env.InternalServerErrorStatusCode;
-                response.message = process.env.ErrorWhileFetchingRaceMsg;
-                reject(error);
-            });
     });
 }
 
@@ -214,6 +203,38 @@ const _readBodyParamsForPartialUpdate = (req, race) => {
         if (req.body.season) race.season = req.body.season;
         if (req.body.winner) race.winner = req.body.winner;
         resolve(race);
+    });
+}
+const _queryAllRaces = (params, response) => {
+    return new Promise((resolve, reject) => {
+        if (params.searchText) {
+            Race.find({
+                circuitName:{
+                    $regex: new RegExp(params.searchText),
+                    $options: 'i'
+                }
+            })
+                .skip(params.offset)
+                .limit(params.count)
+                .then((races) => {
+                    resolve(races);
+                }).catch((error) => {
+                    response.status = process.env.InternalServerErrorStatusCode;
+                    response.message = process.env.ErrorWhileFetchingRaceMsg;
+                    reject(error);
+                });
+        } else {
+            Race.find()
+                .skip(params.offset)
+                .limit(params.count)
+                .then((races) => {
+                    resolve(races);
+                }).catch((error) => {
+                    response.status = process.env.InternalServerErrorStatusCode;
+                    response.message = process.env.ErrorWhileFetchingRaceMsg;
+                    reject(error);
+                });
+        }
     });
 }
 

@@ -1,14 +1,14 @@
 <div class="success" *ngIf="errorMessage">
-    {{errorMessage}}
+    <h1>{{errorMessage}}</h1>
 </div>
 <div class="danger" *ngIf="successMessage">
-    {{successMessage}}
+    <h1>{{successMessage}}</h1>
 </div>
 
-<form (ngSubmit)="onSubmit()" [formGroup]="registerForm">
+<form *ngIf="!successMessage" (ngSubmit)="onSubmit()" [formGroup]="registerForm">
     <label>{{"name" | env}}: <input formControlName="name" /></label><br />
     <label>{{"username" | env}}: <input formControlName="username" /></label><br />
-    <label>{{"password" | env}}: <input formControlName="password" /></label><br />
-    <label>{{"passwordRepeat" | env}}: <input formControlName="passwordRepeat" /></label><br />
+    <label>{{"password" | env}}: <input type="password" formControlName="password" /></label><br />
+    <label>{{"passwordRepeat" | env}}: <input type="password" formControlName="passwordRepeat" /></label><br />
     <button type="submit">{{"register" | env}}</button>
 </form>

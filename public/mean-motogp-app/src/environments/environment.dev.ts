@@ -48,6 +48,7 @@ export const environment: any = {
     raceTeamEditRoute: "races/:raceId/teams/:teamId/edit",
     registerRoute: "register",
     register: "Register",
+    registerWait: 2000,
     riderName: "Rider name",
     rank: "Rank",
     save: "Save",

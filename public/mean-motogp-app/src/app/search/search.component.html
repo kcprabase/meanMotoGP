@@ -1,0 +1,12 @@
+<h1>{{"searchRace"| env}}</h1>
+
+<label>{{"raceCircuitName"|env}}: <input name="searchText" [(ngModel)]="searchText"></label>
+<button (click)="search()">{{"search"|env}}</button>
+
+<ul>
+    <li *ngFor="let race of races">
+        <a routerLink="/races/{{race._id}}">
+            {{race.circuitName}} - {{race.season}}
+        </a>
+    </li>
+</ul>

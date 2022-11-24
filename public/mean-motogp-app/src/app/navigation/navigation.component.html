@@ -1,7 +1,8 @@
 <nav>
     <button routerLink="/">{{"home"|env}}</button>
-    <button routerLink="/races">{{"races"|env}}</button>
-    <button *ngIf="!isLoggedIn" routerLink="/register">{{"register"|env}}</button>
+    <button routerLink="{{'racesRouteRelative'|env}}">{{"races"|env}}</button>
+    <button routerLink="{{'searchRouteRelative'|env}}">{{"search"|env}}</button>
+    <button *ngIf="!isLoggedIn" routerLink="{{'registerRouteRelative'|env}}">{{"register"|env}}</button>
     <button *ngIf="isLoggedIn" routerLink="/profile">{{"profile"|env}}</button>
     <button *ngIf="!isLoggedIn" class="login-btn" routerLink="/login">{{"login"|env}}</button>
     <button *ngIf="isLoggedIn" class="login-btn" (click)="logout()">{{"logout"|env}}</button>

@@ -12,9 +12,12 @@ export class RacesDataService {
   constructor(private _http: HttpClient) {
   }
 
-  public getRaces(offset: number, count: number): Observable<Race[]> {
-    return this._http
-      .get<Race[]>(`${this._baseUrl}?${environment.offset}=${offset}&${environment.count}=${count}`);
+  public getRaces(offset: number, count: number, searchText?: string): Observable<Race[]> {
+    let url = `${this._baseUrl}?${environment.offset}=${offset}&${environment.count}=${count}`;
+    if (searchText) {
+      url += `&searchText=${searchText}`;
+    }
+    return this._http.get<Race[]>(url);
   }
 
   public getRace(raceId: string): Observable<Race> {

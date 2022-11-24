@@ -35,7 +35,7 @@ export class RegisterComponent implements OnInit {
           this.errorMessage = null;
           setTimeout(() => {
             this.router.navigate([""]);
-          }, 3000);
+          }, environment.registerWait);
         } else {
           this.successMessage = null;
           this.errorMessage = environment.tokenNotFound;

@@ -22,6 +22,7 @@ import { TeamFormComponent } from './team-form/team-form.component';
 import { ProfileComponent } from './profile/profile.component';
 import { environment } from 'src/environments/environment';
 import { EnvironmentPipe } from './environment.pipe';
+import { SearchComponent } from './search/search.component';
 
 @NgModule({
   declarations: [
@@ -39,7 +40,8 @@ import { EnvironmentPipe } from './environment.pipe';
     TeamComponent,
     TeamFormComponent,
     ProfileComponent,
-    EnvironmentPipe
+    EnvironmentPipe,
+    SearchComponent
   ],
   imports: [
     BrowserModule,
@@ -94,6 +96,10 @@ import { EnvironmentPipe } from './environment.pipe';
       {
         path: environment.profileROute,
         component: ProfileComponent
+      },
+      {
+        path: environment.searchRoute,
+        component: SearchComponent
       },
       {
         path: environment.pageNotFoundRoute,
