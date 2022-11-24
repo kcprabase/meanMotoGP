@@ -1,9 +1,10 @@
 const express = require("express");
 // const raceController = require("../controllers/races.controller");
 // const teamController = require("../controllers/teams.controller");
-const userController = require("../controllers/users.controller");
+// const userController = require("../controllers/users.controller");
 const router = express.Router();
 const racesRoutes = require("./races.routes");
+const usersRoutes = require("./users.routes");
 
 router.use("/races", racesRoutes);
 // router.route("/races")
@@ -23,11 +24,13 @@ router.use("/races", racesRoutes);
 //     .put(teamController.fullUpdate)
 //     .patch(teamController.partialUpdate);
 
-router.route("/users/register")
-    .post(userController.register);
+router.use("/users", usersRoutes);
 
-router.route("/users/login")
-    .post(userController.login);
+// router.route("/users/register")
+//     .post(userController.register);
+
+// router.route("/users/login")
+//     .post(userController.login);
 
 
 module.exports = router;
