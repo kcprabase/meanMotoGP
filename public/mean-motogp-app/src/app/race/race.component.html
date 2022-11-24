@@ -1,12 +1,12 @@
-<a [routerLink]="['/races']">Back to race list</a>
+<a [routerLink]="[racesRouteRelative]">{{"backToRaceList"|env}}</a>
 <div *ngIf="race">
-    <button *ngIf="isLoggedIn" routerLink="edit">Edit</button>
-    <button *ngIf="isLoggedIn" (click)="delete()">Delete</button>
-    <h1>Circuit name: {{race.circuitName}}</h1>
+    <button *ngIf="isLoggedIn" routerLink="edit">{{"edit"|env}}</button>
+    <button *ngIf="isLoggedIn" (click)="delete()">{{"delete"|env}}</button>
+    <h1>{{"circuitName" | env}}: {{race.circuitName}}</h1>
     <!-- <br /> -->
-    Season: {{race.season}} <br />
-    Winner: {{race.winner}} <br />
-    No. of Teams: <span *ngIf="race.teams">{{race.teams.length}}</span>
+    {{"season" | env}}: {{race.season}} <br />
+    {{"winner" | env}}: {{race.winner}} <br />
+    {{"noOfTeams"|env}}: <span *ngIf="race.teams">{{race.teams.length}}</span>
     <br />
-    <button routerLink="teams">View Teams</button>
+    <button routerLink="teams">{{"viewTeams"|env}}</button>
 </div>

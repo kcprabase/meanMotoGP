@@ -8,13 +8,13 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class RacesDataService {
-  private _baseUrl: string = environment.apiBaseUrl + '/races';
+  private _baseUrl: string = environment.racesApiBaseUrl;
   constructor(private _http: HttpClient) {
   }
 
   public getRaces(offset: number, count: number): Observable<Race[]> {
     return this._http
-      .get<Race[]>(`${this._baseUrl}?offset=${offset}&count=${count}`);
+      .get<Race[]>(`${this._baseUrl}?${environment.offset}=${offset}&${environment.count}=${count}`);
   }
 
   public getRace(raceId: string): Observable<Race> {
@@ -31,7 +31,6 @@ export class RacesDataService {
   }
 
   public updateRace(raceId: string, race: Race): Observable<Race> {
-    console.log("race", race, "raceId", raceId);
     return this._http.put<Race>(`${this._baseUrl}/${raceId}`, race);
   }
 }

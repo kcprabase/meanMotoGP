@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { Race } from '../models/race.model';
 import { AuthenticationService } from '../services/authentication.service';
 import { RacesDataService } from '../services/races-data.service';
@@ -19,29 +18,17 @@ export class RacesComponent implements OnInit {
   }
 
   constructor(private _raceService: RacesDataService,
-    //  private _router: Router, 
      private _authService: AuthenticationService) { }
 
   ngOnInit(): void {
     this.getRaces();
   }
-  // onUpdateClick(raceId: string): void {
-  //   this._router.navigate(['races', raceId, 'edit']);
-  // }
-  // onDeleteClick(raceId: string): void {
-  //   this._raceService.deleteRace(raceId).subscribe((res: any) => {
-  //     console.log(res);
-  //     this.getRaces();
-  //   });
-  // }
 
   private fillRaces(races: Race[]) {
     if (!races || races.length == 0) {
-      console.log("here");
       this.nextDisabled = true;
       this.offsetStepback();
     } else {
-      console.log("there");
       this.races = races;
       this.nextDisabled = false;
     }

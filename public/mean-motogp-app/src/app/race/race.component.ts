@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { environment } from 'src/environments/environment';
 import { Race } from '../models/race.model';
 import { AuthenticationService } from '../services/authentication.service';
 import { RacesDataService } from '../services/races-data.service';
@@ -11,8 +12,9 @@ import { RacesDataService } from '../services/races-data.service';
 })
 export class RaceComponent implements OnInit {
   race!: Race;
+  racesRouteRelative: string = environment.racesRouteRelative;
   get raceId(): string {
-    return this._route.snapshot.params["raceId"];
+    return this._route.snapshot.params[environment.raceIdParam];
   }
   get isLoggedIn(): boolean {
     return this._authService.isLoggedIn;
@@ -27,7 +29,7 @@ export class RaceComponent implements OnInit {
 
   delete(): void {
     this._raceService.deleteRace(this.raceId).subscribe((res: any) => {
-      this._router.navigate(["races"]);
+      this._router.navigate([environment.racesRoute]);
     });
   }
 

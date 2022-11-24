@@ -1,16 +1,16 @@
-<a [routerLink]="['/races', raceId]">Back to race</a><br />
+<a [routerLink]="['/races', raceId]">{{"backToRace"|env}}</a><br />
 <h1>Teams <span *ngIf="race"> at {{race.circuitName}} - {{race.season}}</span></h1>
 
-<button *ngIf="isLoggedIn" routerLink="add">Add Team</button>
-<!-- <ul *ngIf="teams"> -->
-<ul>
+<button *ngIf="isLoggedIn" routerLink="add">{{"addTeam"|env}}</button>
+<ul *ngIf="teams">
+<!-- <ul> -->
     <li *ngFor="let team of teams">
         <a [routerLink]="[team._id]">
             {{team.teamName}} - {{team.riderName}}
         </a>
     </li>
 </ul>
-<!-- <h3 *ngIf="!teams">No teams found</h3> -->
+<h3 *ngIf="!teams">No teams found</h3>
 <!-- 
 <button [disabled]="offset<count" (click)="prev()">Previous</button>
 <button [disabled]="!races || races.length==0 || nextDisabled" (click)="next()">Next</button> -->

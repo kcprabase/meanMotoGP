@@ -1,7 +1,7 @@
 <!-- <br /> -->
-<h1>List of MotoGP Races</h1>
+<h1>{{"listOfMotoGpRaces"|env}}</h1>
 <!-- <br /> -->
-<button *ngIf="isLoggedIn" routerLink="add">Add Race</button>
+<button *ngIf="isLoggedIn" routerLink="add">{{"addRace"|env}}</button>
 
 <ul>
     <li *ngFor="let race of races">
@@ -17,5 +17,5 @@
     </li>
 </ul>
 
-<button [disabled]="offset<count" (click)="prev()">Previous</button>
-<button [disabled]="!races || races.length==0 || nextDisabled" (click)="next()">Next</button>
+<button [disabled]="offset<count" (click)="prev()">{{"previous"|env}}</button>
+<button [disabled]="!races || races.length==0 || nextDisabled" (click)="next()">{{"next"|env}}</button>

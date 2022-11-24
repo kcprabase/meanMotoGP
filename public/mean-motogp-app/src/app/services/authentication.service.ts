@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { User } from '../models/user.model';
 import { JwtHelperService } from "@auth0/angular-jwt";
+import { environment } from 'src/environments/environment';
 
 @Injectable({
     providedIn: 'root'
@@ -14,16 +14,16 @@ export class AuthenticationService {
         this._isLoggedIn = isLoggedIn;
     }
     get token(): string {
-        return localStorage.getItem("token") || "";
+        return localStorage.getItem(environment.tokenLocalStorageItem) || "";
     }
     private set token(token: string) {
-        localStorage.setItem("token", token);
+        localStorage.setItem(environment.tokenLocalStorageItem, token);
     }
     get name(): string {
         return this.decodeToken(this.token).name;
     }
     get bearerToken(): string {
-        return "BEARER " + this.token;
+        return environment.bearerPrefix + this.token;
     }
 
     constructor(private jwtHelper: JwtHelperService) {

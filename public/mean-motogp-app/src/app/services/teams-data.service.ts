@@ -8,29 +8,29 @@ import { Team } from '../models/team.model';
   providedIn: 'root'
 })
 export class TeamsDataService {
-  private _baseUrl: string = environment.apiBaseUrl + '/races';
+  private _baseUrl: string = environment.racesApiBaseUrl;
   constructor(private _http: HttpClient) {
   }
 
   public getTeams(raceId: string, offset: number, count: number): Observable<Team[]> {
     return this._http
-      .get<Team[]>(`${this._baseUrl}/${raceId}/teams?offset=${offset}&count=${count}`);
+      .get<Team[]>(`${this._baseUrl}/${raceId}/${environment.teams}?${environment.offset}=${offset}&${environment.count}=${count}`);
   }
 
   public getTeam(raceId: string, teamId: string): Observable<Team> {
     return this._http
-      .get<Team>(`${this._baseUrl}/${raceId}/teams/${teamId}`);
+      .get<Team>(`${this._baseUrl}/${raceId}/${environment.teams}/${teamId}`);
   }
 
   public deleteTeam(raceId: string, teamId: string): any {
-    return this._http.delete<void>(`${this._baseUrl}/${raceId}/teams/${teamId}`);
+    return this._http.delete<void>(`${this._baseUrl}/${raceId}/${environment.teams}/${teamId}`);
   }
 
   public addTeam(raceId: string, team: Team): Observable<Team> {
-    return this._http.post<Team>(`${this._baseUrl}/${raceId}/teams`, team);
+    return this._http.post<Team>(`${this._baseUrl}/${raceId}/${environment.teams}`, team);
   }
 
   public updateTeam(raceId: string, teamId: string, team: Team): Observable<Team> {
-    return this._http.put<Team>(`${this._baseUrl}/${raceId}/teams/${teamId}`, team);
+    return this._http.put<Team>(`${this._baseUrl}/${raceId}/${environment.teams}/${teamId}`, team);
   }
 }

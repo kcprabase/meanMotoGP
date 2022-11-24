@@ -19,6 +19,9 @@ import { TokenInterceptor } from './interceptors/token.interceptor';
 import { TeamsComponent } from './teams/teams.component';
 import { TeamComponent } from './team/team.component';
 import { TeamFormComponent } from './team-form/team-form.component';
+import { ProfileComponent } from './profile/profile.component';
+import { environment } from 'src/environments/environment';
+import { EnvironmentPipe } from './environment.pipe';
 
 @NgModule({
   declarations: [
@@ -34,7 +37,9 @@ import { TeamFormComponent } from './team-form/team-form.component';
     RaceFormComponent,
     TeamsComponent,
     TeamComponent,
-    TeamFormComponent
+    TeamFormComponent,
+    ProfileComponent,
+    EnvironmentPipe
   ],
   imports: [
     BrowserModule,
@@ -43,51 +48,55 @@ import { TeamFormComponent } from './team-form/team-form.component';
     FormsModule,
     RouterModule.forRoot([
       {
-        path: "",
+        path: environment.homeRoute,
         component: HomeComponent
       },
       {
-        path: "races",
+        path: environment.racesRoute,
         component: RacesComponent,
       },
       {
-        path: "races/add",
+        path: environment.racesAddRoute,
         component: RaceFormComponent
       },
       {
-        path: "races/:raceId/edit",
+        path: environment.racesRaceEditRoute,
         component: RaceFormComponent
       },
       {
-        path: "races/:raceId",
+        path: environment.raceDetailRoute,
         component: RaceComponent
       },
       {
-        path: "races/:raceId/teams",
+        path: environment.raceTeamListRoute,
         component: TeamsComponent
       },
       {
-        path: "races/:raceId/teams/add",
+        path: environment.raceTeamAddRoute,
         component: TeamFormComponent
       },
       {
-        path: "races/:raceId/teams/:teamId/edit",
+        path: environment.raceTeamEditRoute,
         component: TeamFormComponent
       },
       {
-        path: "races/:raceId/teams/:teamId",
+        path: environment.teamDetailRoute,
         component: TeamComponent
       },
       {
-        path: "register",
+        path: environment.registerRoute,
         component: RegisterComponent
       },
       {
-        path: "login",
+        path: environment.loginRoute,
         component: LoginComponent
       },
       {
-        path: "**",
+        path: environment.profileROute,
+        component: ProfileComponent
+      },
+      {
+        path: environment.pageNotFoundRoute,
         component: ErrorPageComponent
       }
     ])

@@ -1,35 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms'
 import { Router } from '@angular/router';
+import { environment } from 'src/environments/environment';
 import { User } from '../models/user.model';
 import { AuthenticationService } from '../services/authentication.service';
 import { UsersDataService } from '../services/users-data.service';
-
-// class Credentials {
-//   #username!: string;
-//   #password!: string;
-
-//   set username(username: string) {
-//     this.#username = username;
-//   }
-
-//   get username(): string {
-//     return this.#username;
-//   }
-
-//   set password(password: string) {
-//     this.#password = password;
-//   }
-
-//   get password(): string {
-//     return this.#password;
-//   }
-
-//   constructor(username: string, password: string) {
-//     this.#username = username;
-//     this.#password = password;
-//   }
-// }
 
 @Component({
   selector: 'app-login',
@@ -62,11 +37,9 @@ export class LoginComponent implements OnInit {
         errorOccured = true;
       },
       complete: () => {
-        console.log("here");
-
         if (errorOccured) {
           this.user.reset();
-          alert("Login unsuccessful");
+          alert(environment.loginUnsuccess);
         }
       }
     });

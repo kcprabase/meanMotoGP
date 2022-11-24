@@ -6,9 +6,9 @@
 </div>
 
 <form (ngSubmit)="onSubmit()" [formGroup]="registerForm">
-    <label>Name: <input formControlName="name" /></label><br />
-    <label>Username: <input formControlName="username" /></label><br />
-    <label>Password: <input formControlName="password" /></label><br />
-    <label>Password Repeat: <input formControlName="passwordRepeat" /></label><br />
-    <button type="submit">Submit</button>
+    <label>{{"name" | env}}: <input formControlName="name" /></label><br />
+    <label>{{"username" | env}}: <input formControlName="username" /></label><br />
+    <label>{{"password" | env}}: <input formControlName="password" /></label><br />
+    <label>{{"passwordRepeat" | env}}: <input formControlName="passwordRepeat" /></label><br />
+    <button type="submit">{{"register" | env}}</button>
 </form>

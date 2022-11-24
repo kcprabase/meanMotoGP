@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { environment } from 'src/environments/environment';
 import { Team } from '../models/team.model';
 import { AuthenticationService } from '../services/authentication.service';
 import { TeamsDataService } from '../services/teams-data.service';
@@ -11,11 +12,13 @@ import { TeamsDataService } from '../services/teams-data.service';
 })
 export class TeamComponent implements OnInit {
   team!: Team;
+  racesRouteRelative: string = environment.racesRouteRelative;
+  teamsRoute: string = environment.teams;
   get teamId(): string {
-    return this._route.snapshot.params["teamId"];
+    return this._route.snapshot.params[environment.teamIdParam];
   }
   get raceId(): string {
-    return this._route.snapshot.params["raceId"];
+    return this._route.snapshot.params[environment.raceIdParam];
   }
   get isLoggedIn(): boolean {
     return this._authService.isLoggedIn;
@@ -32,7 +35,7 @@ export class TeamComponent implements OnInit {
 
   delete(): void {
     this._teamService.deleteTeam(this.raceId, this.teamId).subscribe((res: any) => {
-      this._router.navigate(["races", this.raceId, "teams"]);
+      this._router.navigate([environment.racesRoute, this.raceId, environment.teamsRoute]);
     });
   }
 

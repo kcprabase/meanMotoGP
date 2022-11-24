@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+import { environment } from 'src/environments/environment';
 import { Race } from '../models/race.model';
 import { Team } from '../models/team.model';
 import { AuthenticationService } from '../services/authentication.service';
@@ -22,16 +23,12 @@ export class TeamsComponent implements OnInit {
   }
 
   get raceId(): string {
-    return this._route.snapshot.params["raceId"];
+    return this._route.snapshot.params[environment.raceIdParam];
   }
-  // private get teamId(): string {
-  //   return this._route.snapshot.params["teamId"];
-  // }
 
   constructor(private _teamService: TeamsDataService,
     private _raceService: RacesDataService,
-    private _route: ActivatedRoute,
-    private _router: Router, private _authService: AuthenticationService) {
+    private _route: ActivatedRoute, private _authService: AuthenticationService) {
   }
 
   ngOnInit(): void {
@@ -39,17 +36,7 @@ export class TeamsComponent implements OnInit {
     this.getRace();
   }
 
-  // onUpdateClick(raceId: string): void {
-  //   this._router.navigate(['races', 'edit', raceId]);
-  // }
-  // onDeleteClick(raceId: string, teamId: string): void {
-  //   this._teamService.deleteTeam(raceId, teamId).subscribe((res: any) => {
-  //     this.getTeams();
-  //   });
-  // }
-
   private fillTeams(teams: Team[]) {
-    console.log("teams are", teams);
     if (!teams || teams.length == 0) {
       this.nextDisabled = true;
       this.offsetStepback();
@@ -60,7 +47,6 @@ export class TeamsComponent implements OnInit {
   }
 
   getTeams(): void {
-    console.log("requesting teams ");
     this._teamService.getTeams(this.raceId, this.offset, this.count).subscribe({
       next: (races) => this.fillTeams(races),
       error: (error) => {

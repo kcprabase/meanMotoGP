@@ -1,8 +1,8 @@
-<h2 *ngIf="method=='put'">Edit race</h2>
-<h2 *ngIf="method=='post'">Add race</h2>
+<h2 *ngIf="method=='put'">{{"editRace"|env}}</h2>
+<h2 *ngIf="method=='post'">{{"addRace"|env}}</h2>
 <form *ngIf="method == 'post' || ( method=='put' && race)" (ngSubmit)="onSubmit()" #raceForm="ngForm">
-    <label>Circuit Name: <input name="circuitName" [(ngModel)]="race.circuitName" /></label><br />
-    <label>Season: <input name="season" type="number" [(ngModel)]="race.season" /></label><br />
-    <label>Winner: <input name="winner" [(ngModel)]="race.winner" /></label><br />
-    <button type="submit">Save</button>
+    <label>{{"circuitName" | env}}: <input name="circuitName" [(ngModel)]="race.circuitName" /></label><br />
+    <label>{{"season" | env}}: <input name="season" type="number" [(ngModel)]="race.season" /></label><br />
+    <label>{{"winner" | env}}: <input name="winner" [(ngModel)]="race.winner" /></label><br />
+    <button type="submit">{{"save" | env}}</button>
 </form>
