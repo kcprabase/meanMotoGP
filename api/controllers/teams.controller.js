@@ -39,6 +39,118 @@ const getOne = (req, res) => {
 };
 
 const deleteOne = (req, res) => {
+    const response = utility.getDefaultResponse(process.env.NoContentSuccessStatusCode);
+    getRaceById(req, response)
+        .then(race => _findTeamByIdAndDelete(req, race, response))
+        .then(race => _saveRace2(response, race))
+        .catch(error => utility.appLog(error))
+        .finally(() => utility.sendResponse(res, response));
+};
+
+const fullUpdate = (req, res) => {
+    const response = utility.getDefaultResponse(process.env.NoContentSuccessStatusCode);
+    getRaceById(req, response)
+        .then(race => _getTeamByIdAndFullUpdate(req, race, response))
+        .then(race => _saveRace2(response, race))
+        .catch(error => utility.appLog(error))
+        .finally(() => utility.sendResponse(res, response));
+};
+
+const partialUpdate = (req, res) => {
+    const response = utility.getDefaultResponse(process.env.NoContentSuccessStatusCode);
+    getRaceById(req, response)
+        .then(race => _getTeamByIdAndPartialUpdate(req, race, response))
+        .then(race => _saveRace2(response, race))
+        .catch(error => utility.appLog(error))
+        .finally(() => utility.sendResponse(res, response));
+};
+
+const _getTeamByIdAndFullUpdate = (req, race, response) => {
+    return new Promise((resolve, reject) => {
+        const teamId = _readQueryParamForTeamId(req, response);
+        if (race.teams) {
+            const updateIndex = race.teams.findIndex(team => team._id.equals(teamId));
+            race.teams[updateIndex].riderName = req.body.riderName;
+            race.teams[updateIndex].teamName = req.body.teamName;
+            race.teams[updateIndex].rank = req.body.rank;
+            resolve(race);
+        } else {
+            response.status = process.env.ResourceNotFoundStatusCode;
+            response.message = process.env.NoTeamsFoundMsg;
+            reject(response.message);
+        }
+    });
+}
+
+const _getTeamByIdAndPartialUpdate = (req, race, response) => {
+    return new Promise((resolve, reject) => {
+        const teamId = _readQueryParamForTeamId(req, response);
+        if (race.teams) {
+            const updateIndex = race.teams.findIndex(team => team._id.equals(teamId));
+            if (req.body.riderName) race.teams[updateIndex].riderName = req.body.riderName
+            if (req.body.teamName) race.teams[updateIndex].teamName = req.body.teamName;
+            if (req.body.rank) race.teams[updateIndex].rank = req.body.rank;
+            resolve(race);
+        } else {
+            response.status = process.env.ResourceNotFoundStatusCode;
+            response.message = process.env.NoTeamsFoundMsg;
+            reject(response.message);
+        }
+    });
+}
+
+const fullUpdate2 = (req, res) => {
+    _findTeamByIdAndCallBack(req, res, _updateTeamFull);
+};
+
+const partialUpdate2 = (req, res) => {
+    _findTeamByIdAndCallBack(req, res, _updateTeamPartial);
+};
+
+
+const _updateOneTeam = (req, res, response, race, updateIndex, updateCallBack) => {
+    if (Object.keys(req.body).length > 0) {
+        updateCallBack(req, race, updateIndex);
+        _saveRace(res, response, race);
+    } else {
+        response.status = process.env.BadRequestStatusCode;
+        response.message = process.env.RequestBodyNotFound;
+        _sendResponse(res, response);
+    }
+};
+
+const _updateTeamFull = (req, res, response, race, updateIndex) => {
+    _updateOneTeam(req, res, response, race, updateIndex, (req, race, updateIndex) => {
+        race.teams[updateIndex].riderName = req.body.riderName;
+        race.teams[updateIndex].teamName = req.body.teamName;
+        race.teams[updateIndex].rank = req.body.rank;
+    });
+};
+
+const _updateTeamPartial = (req, res, response, race, updateIndex) => {
+    _updateOneTeam(req, res, response, race, updateIndex, (req, race, updateIndex) => {
+        if (req.body.riderName) race.teams[updateIndex].riderName = req.body.riderName
+        if (req.body.teamName) race.teams[updateIndex].teamName = req.body.teamName;
+        if (req.body.rank) race.teams[updateIndex].rank = req.body.rank;
+    });
+};
+
+const _findTeamByIdAndDelete = (req, race, response) => {
+    return new Promise((resolve, reject) => {
+        const teamId = _readQueryParamForTeamId(req, response);
+        if (race.teams) {
+            const teamIndex = race.teams.findIndex(team => team._id.equals(teamId));
+            race.teams.splice(teamIndex, 1);
+            resolve(race);
+        } else {
+            response.status = process.env.ResourceNotFoundStatusCode;
+            response.message = process.env.NoTeamsFoundMsg;
+            reject(response.message);
+        }
+    })
+}
+
+const deleteOne2 = (req, res) => {
     const _deleteTeam = function (req, res, response, race, teamIndex) {
         race.teams.splice(teamIndex, 1);
         response.status = process.env.NoContentSuccessStatusCode;
@@ -261,41 +373,6 @@ const getOne2 = (req, res) => {
     }
 
     _findTeamsByRaceIdAndCallBack(req, res, _getOneTeamCallBack);
-};
-
-const _updateOneTeam = (req, res, response, race, updateIndex, updateCallBack) => {
-    if (Object.keys(req.body).length > 0) {
-        updateCallBack(req, race, updateIndex);
-        _saveRace(res, response, race);
-    } else {
-        response.status = process.env.BadRequestStatusCode;
-        response.message = process.env.RequestBodyNotFound;
-        _sendResponse(res, response);
-    }
-};
-
-const _updateTeamFull = (req, res, response, race, updateIndex) => {
-    _updateOneTeam(req, res, response, race, updateIndex, (req, race, updateIndex) => {
-        race.teams[updateIndex].riderName = req.body.riderName;
-        race.teams[updateIndex].teamName = req.body.teamName;
-        race.teams[updateIndex].rank = req.body.rank;
-    });
-};
-
-const _updateTeamPartial = (req, res, response, race, updateIndex) => {
-    _updateOneTeam(req, res, response, race, updateIndex, (req, race, updateIndex) => {
-        if (req.body.riderName) race.teams[updateIndex].riderName = req.body.riderName
-        if (req.body.teamName) race.teams[updateIndex].teamName = req.body.teamName;
-        if (req.body.rank) race.teams[updateIndex].rank = req.body.rank;
-    });
-};
-
-const fullUpdate = (req, res) => {
-    _findTeamByIdAndCallBack(req, res, _updateTeamFull);
-};
-
-const partialUpdate = (req, res) => {
-    _findTeamByIdAndCallBack(req, res, _updateTeamPartial);
 };
 
 module.exports = {
