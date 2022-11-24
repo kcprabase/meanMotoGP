@@ -1,7 +1,7 @@
 <a [routerLink]="['/races']">Back to race list</a>
 <div *ngIf="race">
-    <button routerLink="edit">Edit</button>
-    <button (click)="delete()">Delete</button>
+    <button *ngIf="isLoggedIn" routerLink="edit">Edit</button>
+    <button *ngIf="isLoggedIn" (click)="delete()">Delete</button>
     <h1>Circuit name: {{race.circuitName}}</h1>
     <!-- <br /> -->
     Season: {{race.season}} <br />

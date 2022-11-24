@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Team } from '../models/team.model';
+import { AuthenticationService } from '../services/authentication.service';
 import { TeamsDataService } from '../services/teams-data.service';
 
 @Component({
@@ -16,8 +17,11 @@ export class TeamComponent implements OnInit {
   get raceId(): string {
     return this._route.snapshot.params["raceId"];
   }
+  get isLoggedIn(): boolean {
+    return this._authService.isLoggedIn;
+  }
   constructor(private _teamService: TeamsDataService,
-    private _router: Router,
+    private _router: Router, private _authService: AuthenticationService,
     private _route: ActivatedRoute) { }
 
   ngOnInit(): void {

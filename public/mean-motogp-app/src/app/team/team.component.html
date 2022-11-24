@@ -1,7 +1,7 @@
 <a [routerLink]="['/races',raceId, 'teams']">Back to team list</a>
 <div *ngIf="team">
-    <button routerLink="edit">Edit</button>
-    <button (click)="delete()">Delete</button>
+    <button *ngIf="isLoggedIn" routerLink="edit">Edit</button>
+    <button *ngIf="isLoggedIn" (click)="delete()">Delete</button>
     <h1>Team name: <b>{{team.teamName}}</b></h1>
     <!-- <br /> -->
     Season: {{team.riderName}} <br />
