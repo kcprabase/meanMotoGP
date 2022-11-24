@@ -26,6 +26,15 @@ const register = (req, res) => {
         .finally(() => utility.sendResponse(res, response));
 };
 
+const _createTokenResponse = (user, response) => {
+    const token = _getToken(user);
+    response.message = { token: token };
+}
+
+const _getToken = (user) => {
+    return jwt.sign({ name: user.name }, process.env.JwtSecretKey, { expiresIn: 60 * 60 });
+}
+
 const _readBodyParamsForRegister = (req, response, newUser) => {
     return new Promise((resolve, reject) => {
         if (!req.body || !req.body.name || !req.body.username || !req.body.password) {
@@ -72,11 +81,6 @@ const _runAddUserQuery = (newUser, response) => {
             reject(error);
         });
     });
-}
-
-const _createTokenResponse = (user, response) => {
-    const token = _getToken(user);
-    response.message = { token: token };
 }
 
 const _checkBodyParamsForLogin = (req, response) => {
@@ -128,10 +132,6 @@ const _comparePassword = (req, user, response) => {
                 reject(process.env.Unauthorized);
             });
     });
-}
-
-const _getToken = (user) => {
-    return jwt.sign({ name: user.name }, process.env.JwtSecretKey, { expiresIn: 60 * 60 });
 }
 
 module.exports = { register, login }

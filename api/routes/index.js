@@ -1,7 +1,7 @@
 const express = require("express");
-const raceController = require("./controllers/races.controller");
-const teamController = require("./controllers/teams.controller");
-const userController = require("./controllers/users.controller");
+const raceController = require("../controllers/races.controller");
+const teamController = require("../controllers/teams.controller");
+const userController = require("../controllers/users.controller");
 const router = express.Router();
 
 router.route("/races")
