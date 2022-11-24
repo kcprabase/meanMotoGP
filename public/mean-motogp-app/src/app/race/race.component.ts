@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Race } from '../models/race.model';
 import { RacesDataService } from '../services/races-data.service';
 
@@ -10,12 +10,20 @@ import { RacesDataService } from '../services/races-data.service';
 })
 export class RaceComponent implements OnInit {
   race!: Race;
-  constructor(private _raceService: RacesDataService, private _route: ActivatedRoute) { }
+  get raceId(): string {
+    return this._route.snapshot.params["raceId"];
+  }
+  constructor(private _raceService: RacesDataService, private _route: ActivatedRoute, private _router: Router) { }
 
   ngOnInit(): void {
-    const raceId: string = this._route.snapshot.params["raceId"];
-    this._raceService.getRace(raceId).subscribe(race => {
+    this._raceService.getRace(this.raceId).subscribe(race => {
       this.race = race;
+    });
+  }
+
+  delete(): void {
+    this._raceService.deleteRace(this.raceId).subscribe((res: any) => {
+      this._router.navigate(["races"]);
     });
   }
 

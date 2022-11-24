@@ -1,0 +1,8 @@
+<h2 *ngIf="method=='put'">Edit team</h2>
+<h2 *ngIf="method=='post'">Add team</h2>
+<form *ngIf="method == 'post' || ( method=='put' && team)" (ngSubmit)="onSubmit()" #raceForm="ngForm">
+    <label>Team Name: <input name="teamName" [(ngModel)]="team.teamName" /></label><br />
+    <label>Rider Name: <input name="riderName" [(ngModel)]="team.riderName" /></label><br />
+    <label>Rank: <input name="winner" type="number" [(ngModel)]="team.rank" /></label><br />
+    <button type="submit">Save</button>
+</form>

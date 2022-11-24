@@ -5,8 +5,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Race } from '../models/race.model';
 import { RacesDataService } from '../services/races-data.service';
 
-
-
 @Component({
   selector: 'app-race-form',
   templateUrl: './race-form.component.html',

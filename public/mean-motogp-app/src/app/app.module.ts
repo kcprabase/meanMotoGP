@@ -16,6 +16,9 @@ import { LoginComponent } from './login/login.component';
 import { RaceFormComponent } from './race-form/race-form.component';
 import { JwtHelperService, JWT_OPTIONS } from '@auth0/angular-jwt';
 import { TokenInterceptor } from './interceptors/token.interceptor';
+import { TeamsComponent } from './teams/teams.component';
+import { TeamComponent } from './team/team.component';
+import { TeamFormComponent } from './team-form/team-form.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +31,10 @@ import { TokenInterceptor } from './interceptors/token.interceptor';
     ErrorPageComponent,
     RegisterComponent,
     LoginComponent,
-    RaceFormComponent
+    RaceFormComponent,
+    TeamsComponent,
+    TeamComponent,
+    TeamFormComponent
   ],
   imports: [
     BrowserModule,
@@ -49,12 +55,28 @@ import { TokenInterceptor } from './interceptors/token.interceptor';
         component: RaceFormComponent
       },
       {
-        path: "races/edit/:raceId",
+        path: "races/:raceId/edit",
         component: RaceFormComponent
       },
       {
         path: "races/:raceId",
         component: RaceComponent
+      },
+      {
+        path: "races/:raceId/teams",
+        component: TeamsComponent
+      },
+      {
+        path: "races/:raceId/teams/add",
+        component: TeamFormComponent
+      },
+      {
+        path: "races/:raceId/teams/:teamId/edit",
+        component: TeamFormComponent
+      },
+      {
+        path: "races/:raceId/teams/:teamId",
+        component: TeamComponent
       },
       {
         path: "register",

@@ -18,20 +18,22 @@ export class RacesComponent implements OnInit {
     return this._authService.isLoggedIn;
   }
 
-  constructor(private _raceService: RacesDataService, private _router: Router, private _authService: AuthenticationService) { }
+  constructor(private _raceService: RacesDataService,
+    //  private _router: Router, 
+     private _authService: AuthenticationService) { }
 
   ngOnInit(): void {
     this.getRaces();
   }
-  onUpdateClick(raceId: string): void {
-    this._router.navigate(['races', 'edit', raceId]);
-  }
-  onDeleteClick(raceId: string): void {
-    this._raceService.deleteRace(raceId).subscribe((res: any) => {
-      console.log(res);
-      this.getRaces();
-    });
-  }
+  // onUpdateClick(raceId: string): void {
+  //   this._router.navigate(['races', raceId, 'edit']);
+  // }
+  // onDeleteClick(raceId: string): void {
+  //   this._raceService.deleteRace(raceId).subscribe((res: any) => {
+  //     console.log(res);
+  //     this.getRaces();
+  //   });
+  // }
 
   private fillRaces(races: Race[]) {
     if (!races || races.length == 0) {

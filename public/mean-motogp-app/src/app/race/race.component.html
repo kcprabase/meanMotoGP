@@ -1,7 +1,12 @@
-<ng-container *ngIf="race">
-    <h1>{{race.circuitName}}</h1>
-    <br />
+<a [routerLink]="['/races']">Back to race list</a>
+<div *ngIf="race">
+    <button routerLink="edit">Edit</button>
+    <button (click)="delete()">Delete</button>
+    <h1>Circuit name: {{race.circuitName}}</h1>
+    <!-- <br /> -->
     Season: {{race.season}} <br />
     Winner: {{race.winner}} <br />
     No. of Teams: <span *ngIf="race.teams">{{race.teams.length}}</span>
-</ng-container>
+    <br />
+    <button routerLink="teams">View Teams</button>
+</div>

@@ -77,7 +77,7 @@ const _saveRace = (res, response, race) => {
         } else {
             if (!response.status)
                 response.status = process.env.CreateSuccessStatusCode;
-            response.message = updatedRace.teams
+            response.message = updatedRace.teams[updatedRace.teams.length - 1]
         }
         console.log("st code", response);
         _sendResponse(res, response);

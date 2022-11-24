@@ -1,3 +1,5 @@
+<h2 *ngIf="method=='put'">Edit race</h2>
+<h2 *ngIf="method=='post'">Add race</h2>
 <form *ngIf="method == 'post' || ( method=='put' && race)" (ngSubmit)="onSubmit()" #raceForm="ngForm">
     <label>Circuit Name: <input name="circuitName" [(ngModel)]="race.circuitName" /></label><br />
     <label>Season: <input name="season" type="number" [(ngModel)]="race.season" /></label><br />
