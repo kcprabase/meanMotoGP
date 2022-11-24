@@ -8,12 +8,13 @@ const User = mongoose.model(process.env.UserModel);
 const login = (req, res) => {
     let response = { status: process.env.OkStatusCode };
     _checkBodyParamsForLogin(req, response)
-        .then(() => _findOneUserByUsername(req.body.username))
+        .then(() => _findOneUserByUsername(req.body.username, response))
         .then(user => _comparePassword(req, user, response))
         .then(user => _createTokenResponse(user, response))
         .catch(error => utility.appLog(error))
         .finally(() => utility.sendResponse(res, response));
 }
+
 
 const register = (req, res) => {
     let response = { status: process.env.OkStatusCode };
@@ -95,7 +96,7 @@ const _checkBodyParamsForLogin = (req, response) => {
     });
 }
 
-const _findOneUserByUsername = (username) => {
+const _findOneUserByUsername = (username, response) => {
     return new Promise((resolve, reject) => {
         User.findOne({ username: username })
             .then(user => {

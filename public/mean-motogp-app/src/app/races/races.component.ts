@@ -18,7 +18,7 @@ export class RacesComponent implements OnInit {
   }
 
   constructor(private _raceService: RacesDataService,
-     private _authService: AuthenticationService) { }
+    private _authService: AuthenticationService) { }
 
   ngOnInit(): void {
     this.getRaces();
@@ -30,7 +30,10 @@ export class RacesComponent implements OnInit {
       this.offsetStepback();
     } else {
       this.races = races;
-      this.nextDisabled = false;
+      if (races.length < this.count)
+        this.nextDisabled = true;
+      else
+        this.nextDisabled = false;
     }
   }
 

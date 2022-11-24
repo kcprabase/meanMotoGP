@@ -1,1 +1,10 @@
-<p>profile works!</p>
+<h1>
+    <span *ngIf="isLoggedIn">
+        {{"name"|env}}:  {{name}}
+    </span> 
+</h1>
+
+<h1 *ngIf="!isLoggedIn">
+    Not logged in
+</h1>
+
