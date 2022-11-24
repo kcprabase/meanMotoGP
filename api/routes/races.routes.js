@@ -3,18 +3,18 @@ const raceController = require("../controllers/races.controller");
 const teamController = require("../controllers/teams.controller");
 const router = express.Router();
 
-router.route("/")
+router.route(process.env.RacesRouteMain)
     .get(raceController.getAll)
     .post(raceController.addOne);
-router.route("/:raceId")
+router.route(process.env.RacesRouteRaceId)
     .get(raceController.getOne)
     .delete(raceController.deleteOne)
     .put(raceController.fullUpdate)
     .patch(raceController.partialUpdate);
-router.route("/:raceId/teams")
+router.route(process.env.RacesRouteRaceIdTeams)
     .get(teamController.getAll)
     .post(teamController.addOne);
-router.route("/:raceId/teams/:teamId")
+router.route(process.env.RacesRouteRaceIdTeamsTeamId)
     .get(teamController.getOne)
     .delete(teamController.deleteOne)
     .put(teamController.fullUpdate)
