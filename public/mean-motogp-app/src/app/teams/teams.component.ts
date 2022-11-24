@@ -39,27 +39,28 @@ export class TeamsComponent implements OnInit {
     this.getRace();
   }
 
-  onUpdateClick(raceId: string): void {
-    this._router.navigate(['races', 'edit', raceId]);
-  }
-  onDeleteClick(raceId: string, teamId: string): void {
-    this._teamService.deleteTeam(raceId, teamId).subscribe((res: any) => {
-      this.getTeams();
-    });
-  }
+  // onUpdateClick(raceId: string): void {
+  //   this._router.navigate(['races', 'edit', raceId]);
+  // }
+  // onDeleteClick(raceId: string, teamId: string): void {
+  //   this._teamService.deleteTeam(raceId, teamId).subscribe((res: any) => {
+  //     this.getTeams();
+  //   });
+  // }
 
   private fillTeams(teams: Team[]) {
+    console.log("teams are", teams);
     if (!teams || teams.length == 0) {
       this.nextDisabled = true;
       this.offsetStepback();
     } else {
-      console.log("there");
       this.teams = teams;
       this.nextDisabled = false;
     }
   }
 
   getTeams(): void {
+    console.log("requesting teams ");
     this._teamService.getTeams(this.raceId, this.offset, this.count).subscribe({
       next: (races) => this.fillTeams(races),
       error: (error) => {

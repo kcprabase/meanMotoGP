@@ -13,7 +13,7 @@ const getAll = function (req, res) {
 
 const getOne = (req, res) => {
     const response = utility.getDefaultResponse(process.env.OkStatusCode);
-    _getRaceById(req, response)
+    getRaceById(req, response)
         .then(race => { response.message = race; })
         .catch(error => utility.appLog(error))
         .finally(() => utility.sendResponse(res, response));
@@ -30,7 +30,7 @@ const addOne = (req, res) => {
 
 const fullUpdate = (req, res) => {
     let response = utility.getDefaultResponse(process.env.NoContentSuccessStatusCode);
-    _getRaceById(req, response)
+    getRaceById(req, response)
         .then(race => _readBodyParamsForFullUpdate(req, race))
         .then(race => _runRaceUpdateQuery(race, response))
         .catch(error => utility.appLog(error))//need to handle error here.
@@ -39,7 +39,7 @@ const fullUpdate = (req, res) => {
 
 const partialUpdate = (req, res) => {
     let response = utility.getDefaultResponse(process.env.NoContentSuccessStatusCode);
-    _getRaceById(req, response)
+    getRaceById(req, response)
         .then(race => _readBodyParamsForPartialUpdate(req, race))
         .then(race => _runRaceUpdateQuery(race, response))
         .catch(error => utility.appLog(error))
@@ -48,13 +48,13 @@ const partialUpdate = (req, res) => {
 
 const deleteOne = (req, res) => {
     let response = utility.getDefaultResponse(process.env.NoContentSuccessStatusCode);
-    _getRaceById(req, response)
+    getRaceById(req, response)
         .then(race => _runRaceDeleteQuery(race, response))
         .catch(error => utility.appLog(error))
         .finally(() => utility.sendResponse(res, response));
 }
 
-const _getRaceById = (req, response) => {
+const getRaceById = (req, response) => {
     return new Promise((resolve, reject) => {
         _readQueryParamForRaceId(req, response)
             .then(raceId => _queryRaceById(raceId, response))
@@ -218,4 +218,4 @@ const _readBodyParamsForPartialUpdate = (req, race) => {
 }
 
 
-module.exports = { getAll, getOne, addOne, deleteOne, fullUpdate, partialUpdate };
+module.exports = { getAll, getOne, addOne, deleteOne, fullUpdate, partialUpdate, getRaceById };
