@@ -14,7 +14,7 @@ const addOne = (req, res) => {
     getRaceById(req, response)
         .then(race => _addTeamToRaceFromRequestBody(req, race))
         .then(race => _saveRace2(response, race))
-        .then(savedRace => response.message = savedRace.teams[savedRace.teams.length - 1]) //this should have its own funtion
+        .then(savedRace => _getLastSavedTeamResponse(savedRace, response)) //this should have its own funtion
         .catch(error => utility.appLog(error))
         .finally(() => utility.sendResponse(res, response));
 }
@@ -36,25 +36,33 @@ const getOne = (req, res) => {
         .then(teamList => _getTeamByIdResponse(req, teamList, response))
         .catch(error => utility.appLog(error))
         .finally(() => utility.sendResponse(res, response));
-
-    // const _getOneTeamCallBack = (req, res, response, teams) => {
-    //     const teamId = req.params.teamId;
-    //     if (mongoose.isValidObjectId(teamId)) {
-    //         if (teams.id(teamId)) {
-    //             response.status = process.env.OkStatusCode;
-    //             response.message = teams.id(teamId);
-    //         } else {
-    //             response.status = process.env.ResourceNotFoundStatusCode;
-    //             response.message = process.env.TeamIdNotFound;
-    //         }
-    //         _sendResponse(res, response);
-    //     } else {
-    //         _sendResponse(res, { status: process.env.BadRequestStatusCode, message: process.env.InvalidTeamIdMsg });
-    //     }
-    // }
-
-    // _findTeamsByRaceIdAndCallBack(req, res, _getOneTeamCallBack);
 };
+
+const deleteOne = (req, res) => {
+    const _deleteTeam = function (req, res, response, race, teamIndex) {
+        race.teams.splice(teamIndex, 1);
+        response.status = process.env.NoContentSuccessStatusCode;
+        _saveRace(res, response, race);
+    };
+    _findTeamByIdAndCallBack(req, res, _deleteTeam);
+};
+
+const _saveRace2 = (response, race) => {
+    return new Promise((resolve, reject) => {
+        race.save()
+            .then(savedRace => resolve(savedRace))
+            .catch(error => {
+                response.status = process.env.InternalServerErrorStatusCode;
+                response.message = error;
+                reject();
+            });
+    });
+}
+
+const _getLastSavedTeamResponse = (savedRace, response) => {
+    response.message = savedRace.teams[savedRace.teams.length - 1];
+}
+
 const _readQueryParamForTeamId = (req, response) => {
     teamId = req.params.teamId;
     if (mongoose.isValidObjectId(teamId)) {
@@ -67,22 +75,21 @@ const _readQueryParamForTeamId = (req, response) => {
 }
 
 const _getTeamById = (teams, teamId, response) => {
-    utility.appLog(teams, teamId);
     if (teams.id(teamId)) {
-        utility.appLog("found")
-        response.status = process.env.OkStatusCode;
-        response.message = teams.id(teamId);
+        return teams.id(teamId);
     } else {
-        utility.appLog("notofund")
         response.status = process.env.ResourceNotFoundStatusCode;
         response.message = process.env.TeamIdNotFound;
+        return null;
     }
 }
 
 const _getTeamByIdResponse = (req, teams, response) => {
     const teamId = _readQueryParamForTeamId(req, response);
     if (teamId) {
-        _getTeamById(teams, teamId, response);
+        const team = _getTeamById(teams, teamId, response);
+        response.status = process.env.OkStatusCode;
+        response.message = team;
     }
 }
 
@@ -132,18 +139,6 @@ const _addTeamToRaceFromRequestBody = (req, race) => {
         resolve(race);
     });
 };
-
-const _saveRace2 = (response, race) => {
-    return new Promise((resolve, reject) => {
-        race.save()
-            .then(savedRace => resolve(savedRace))
-            .catch(error => {
-                response.status = process.env.InternalServerErrorStatusCode;
-                response.message = error;
-                reject();
-            });
-    });
-}
 
 const _saveRace = (res, response, race) => {
     race.save((err, updatedRace) => {
@@ -266,15 +261,6 @@ const getOne2 = (req, res) => {
     }
 
     _findTeamsByRaceIdAndCallBack(req, res, _getOneTeamCallBack);
-};
-
-const deleteOne = (req, res) => {
-    const _deleteTeam = function (req, res, response, race, teamIndex) {
-        race.teams.splice(teamIndex, 1);
-        response.status = process.env.NoContentSuccessStatusCode;
-        _saveRace(res, response, race);
-    };
-    _findTeamByIdAndCallBack(req, res, _deleteTeam);
 };
 
 const _updateOneTeam = (req, res, response, race, updateIndex, updateCallBack) => {
