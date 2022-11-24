@@ -17,7 +17,7 @@ const raceSchema = mongoose.Schema({
         type: Number,
         required: true,
         min: parseInt(process.env.RaceSchemaSeasonMin),
-        max: parseInt(RaceSchemaSeasonMax)
+        max: parseInt(process.env.RaceSchemaSeasonMax)
     },
     winner: { type: String, required: false },
     teams: [teamSchema]
