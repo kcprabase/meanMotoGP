@@ -1,40 +1,41 @@
 const mongoose = require("mongoose");
 require("./races.model");
 require("./users.model");
+
 mongoose.connect(process.env.DbUrl, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 });
 
-mongoose.connection.on("connected", () => {
-    console.log("Mongoose connected to ", process.env.DbName);
+mongoose.connection.on(process.env.MongooseConnectedEventName, () => {
+    console.log(process.env.MongooseConnectedToMsg, process.env.DbName);
 });
 
-mongoose.connection.on("disconnected", () => {
-    console.log("Mongoose disconnected");
+mongoose.connection.on(process.env.MongooseDisconnectedEventName, () => {
+    console.log(process.env.MongooseDisconnectedMsg);
 });
 
-mongoose.connection.on("error", (err) => {
-    console.log("Mongoose connection error", err);
+mongoose.connection.on(process.env.MongooseErrorEventName, (err) => {
+    console.log(process.env.MongooseConnectionErrorMsg, err);
 });
 
-process.on("SIGINT", () => {
+process.on(process.env.ProcessEventSIGINT, () => {
     mongoose.connection.close(() => {
         console.log(process.env.SigIntMsg);
         process.exit(0);
     });
 });
 
-process.on("SIGTERM", () => {
+process.on(process.env.ProcessEventSIGTERM, () => {
     mongoose.connection.close(() => {
         console.log(process.env.SigTermMsg);
         process.exit(0);
     });
 });
 
-process.on("SIGUSR2", () => {
+process.on(process.env.ProcessEventSIGUSR2, () => {
     mongoose.connection.close(() => {
         console.log(process.env.SigUSR2Msg);
-        process.kill(process.pid, "SIGUSR2");
+        process.kill(process.pid, process.env.ProcessEventSIGUSR2);
     });
 });
